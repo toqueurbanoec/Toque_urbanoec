@@ -1,1 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo - Toque Urbano</title>
 
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #ffffff;
+      color: #222;
+    }
+
+    header {
+      text-align: center;
+      padding: 2rem 1rem 1rem;
+    }
+
+    .logo-text {
+      font-size: 2.2rem;
+      letter-spacing: 7px;
+      font-weight: bold;
+      margin: 0;
+      color: #111;
+    }
+
+    .logo-sub {
+      font-size: 0.9rem;
+      letter-spacing: 4px;
+      color: #555;
+      margin-top: 5px;
+    }
+
+    nav {
+      background: #111;
+      text-align: center;
+      padding: 12px 0;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+    }
+
+    nav a:hover {
+      color: #c9a227;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 2rem;
+    }
+
+    h2 {
+      text-align: center;
+      border-bottom: 2px solid #c9a227;
+      padding-bottom: 8px;
+    }
+
+    .filtros {
+      text-align: center;
+      margin: 2rem 0;
+    }
+
+    .filtros button {
+      background: #111;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      margin: 5px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .filtros button:hover,
+    .filtros button.activo {
+      background: #c9a227;
+      color: #111;
+    }
+
+    .productos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+
+    .producto {
+      position: relative;
+      border: 1px solid #ddd;
+      border-radius: 14px;
+      padding: 1rem;
+      text-align: center;
+      background: #fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .etiqueta-destacado {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: #c9a227;
+      color: #111;
+      padding: 6px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      z-index: 2;
+    }
+
+    .imagen-producto {
+      width: 100%;
+      height: 330px;
+      background: #f4f4f4;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .imagen-producto img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      display: block;
+    }
+
+    .producto h3 {
+      color: #c9a227;
+      margin-bottom: 5px;
+    }
+
+    .categoria {
+      font-size: 0.85rem;
+      color: #777;
+      font-weight: bold;
+    }
+
+    .descripcion {
+      font-size: 0.9rem;
+      color: #444;
+      min-height: 40px;
+    }
+
+    .detalle-producto {
+      font-size: 0.88rem;
+      color: #333;
+      margin: 6px 0;
+    }
+
+    .precio {
+      font-weight: bold;
+      font-size: 1.2rem;
+      color: #111;
+      margin-top: 12px;
+    }
+
+    .precio-normal {
+      color: #888;
+      text-decoration: line-through;
+      font-size: 0.95rem;
+      margin-right: 6px;
+    }
+
+    .precio-oferta {
+      color: #c9a227;
+      font-weight: bold;
+      font-size: 1.25rem;
+    }
+
+    .stock {
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    .disponible {
+      color: #1b7f3a;
+    }
+
+    .agotado {
+      color: #b00020;
+    }
+
+    .button {
+      display: inline-block;
+      background: #111;
+      color: white;
+      padding: 11px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .button:hover {
+      background: #c9a227;
+      color: #111;
+    }
+
+    .button.disabled {
+      background: #999;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    .mensaje {
+      text-align: center;
+      padding: 2rem;
+      color: #555;
+    }
+
+    footer {
+      background: #111;
+      color: white;
+      text-align: center;
+      padding: 2rem 1rem;
+      margin-top: 3rem;
+    }
+
+    footer h4 {
+      color: #c9a227;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        padding: 1rem;
+      }
+
+      .logo-text {
+        font-size: 1.8rem;
+        letter-spacing: 5px;
+      }
+
+      nav a {
+        margin: 0 8px;
+        font-size: 0.9rem;
+      }
+
+      .imagen-producto {
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1 class="logo-text">TOQUE URBANO</h1>
+  <div class="logo-sub">BOUTIQUE</div>
+</header>
+
+<nav>
+  <a href="index.html">Inicio</a>
+  <a href="catalogo.html">Catálogo</a>
+  <a href="index.html#contacto">Contacto</a>
+</nav>
+
+<main>
+  <h2>Catálogo de Productos</h2>
+
+  <div class="filtros" id="filtros">
+    <button class="activo" onclick="filtrarProductos('todos', this)">Todos</button>
+  </div>
+
+  <div class="productos" id="productos"></div>
+
+  <div class="mensaje" id="mensaje">Cargando catálogo...</div>
+</main>
+
+<footer>
+  <h4>Toque Urbano Boutique</h4>
+  <p>Moda urbana, moderna y elegante.</p>
+  <p>&copy; 2026 Toque Urbano. Todos los derechos reservados.</p>
+</footer>
+
+<script>
+  const API_URL = "https://script.google.com/macros/s/AKfycbyXbBGAybeZNJbMm61Q6GY9mybAb1Arni-Rjc5gf1LhgWb1wENkTMBrDDfy6Jqa5Jbd/exec";
+
+  let productosGlobal = [];
+  let configuracion = {};
+
+  async function cargarDatos() {
+    try {
+      const configRes = await fetch(API_URL + "?accion=configuracion");
+      const configJson = await configRes.json();
+      configuracion = configJson.data || {};
+
+      const categoriasRes = await fetch(API_URL + "?accion=categorias");
+      const categoriasJson = await categoriasRes.json();
+
+      const productosRes = await fetch(API_URL + "?accion=productos");
+      const productosJson = await productosRes.json();
+
+      productosGlobal = productosJson.data || [];
+
+      cargarCategorias(categoriasJson.data || []);
+      mostrarProductos(productosGlobal);
+
+    } catch (error) {
+      document.getElementById("mensaje").innerText = "No se pudo cargar el catálogo.";
+      console.error(error);
+    }
+  }
+
+  function cargarCategorias(categorias) {
+    const contenedor = document.getElementById("filtros");
+
+    categorias.forEach(cat => {
+      const btn = document.createElement("button");
+      btn.textContent = cat.nombre;
+      btn.onclick = function() {
+        filtrarProductos(cat.nombre, btn);
+      };
+      contenedor.appendChild(btn);
+    });
+  }
+
+  function convertirImagenDrive(url) {
+    if (!url) {
+      return "https://via.placeholder.com/500x650?text=Toque+Urbano";
+    }
+
+    let id = "";
+
+    if (url.includes("/file/d/")) {
+      id = url.split("/file/d/")[1].split("/")[0];
+    } else if (url.includes("id=")) {
+      id = url.split("id=")[1].split("&")[0];
+    }
+
+    if (id) {
+      return `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
+    }
+
+    return url;
+  }
+
+  function obtenerVariantePrincipal(producto) {
+    if (producto.variantes && producto.variantes.length > 0) {
+      return producto.variantes[0];
+    }
+
+    return {};
+  }
+
+  function formatoPrecio(valor) {
+    if (valor === undefined || valor === null || valor === "") return "";
+    return "$" + Number(valor).toFixed(2);
+  }
+
+  function obtenerPrecioHTML(variante) {
+    const precio = variante.precio;
+    const precioOferta = variante.precio_oferta;
+
+    if (precioOferta && Number(precioOferta) > 0) {
+      return `
+        <p class="precio">
+          <span class="precio-normal">${formatoPrecio(precio)}</span>
+          <span class="precio-oferta">${formatoPrecio(precioOferta)}</span>
+        </p>
+      `;
+    }
+
+    if (precio && Number(precio) > 0) {
+      return `<p class="precio">${formatoPrecio(precio)}</p>`;
+    }
+
+    return `<p class="precio">Consultar precio</p>`;
+  }
+
+  function obtenerStockHTML(variante) {
+    const stock = Number(variante.stock || 0);
+
+    if (stock > 0) {
+      return `<p class="stock disponible">Disponible: ${stock} unidad(es)</p>`;
+    }
+
+    return `<p class="stock agotado">Agotado</p>`;
+  }
+
+  function mostrarProductos(productos) {
+    const contenedor = document.getElementById("productos");
+    const mensaje = document.getElementById("mensaje");
+
+    contenedor.innerHTML = "";
+
+    if (!productos || productos.length === 0) {
+      mensaje.innerText = "Próximamente tendremos productos disponibles.";
+      return;
+    }
+
+    mensaje.innerText = "";
+
+    productos.forEach(producto => {
+      const variante = obtenerVariantePrincipal(producto);
+
+      const imagen = convertirImagenDrive(producto.imagen_principal_url || variante.imagen_url);
+      const descripcion = producto.descripcion || "Producto disponible en Toque Urbano.";
+      const categoria = producto.categoria || "General";
+      const nombre = producto.nombre || "Producto";
+      const color = variante.color || "";
+      const talla = variante.talla || "";
+      const destacado = String(producto.destacado || "").toLowerCase() === "si";
+      const stock = Number(variante.stock || 0);
+
+      const whatsapp = configuracion.whatsapp || "593988951244";
+      const mensajeBase = configuracion.mensaje_whatsapp || "Hola, vengo de la página web de Toque Urbano. Me interesa este producto:";
+      const textoWhatsapp = encodeURIComponent(`${mensajeBase} ${nombre}`);
+      const linkWhatsapp = `https://wa.me/${whatsapp}?text=${textoWhatsapp}`;
+
+      const card = document.createElement("div");
+      card.className = "producto";
+      card.innerHTML = `
+        ${destacado ? '<div class="etiqueta-destacado">DESTACADO</div>' : ''}
+
+        <div class="imagen-producto">
+          <img src="${imagen}" alt="${nombre}" loading="lazy">
+        </div>
+
+        <h3>${nombre}</h3>
+        <p class="categoria">${categoria}</p>
+        <p class="descripcion">${descripcion}</p>
+
+        ${color ? `<p class="detalle-producto"><strong>Color:</strong> ${color}</p>` : ''}
+        ${talla ? `<p class="detalle-producto"><strong>Talla:</strong> ${talla}</p>` : ''}
+
+        ${obtenerPrecioHTML(variante)}
+        ${obtenerStockHTML(variante)}
+
+        <a href="${linkWhatsapp}" class="button ${stock <= 0 ? 'disabled' : ''}" target="_blank">
+          ${stock <= 0 ? 'Producto agotado' : 'Consultar por WhatsApp'}
+        </a>
+      `;
+
+      contenedor.appendChild(card);
+    });
+  }
+
+  function filtrarProductos(categoria, boton) {
+    document.querySelectorAll(".filtros button").forEach(btn => btn.classList.remove("activo"));
+    boton.classList.add("activo");
+
+    if (categoria === "todos") {
+      mostrarProductos(productosGlobal);
+      return;
+    }
+
+    const filtrados = productosGlobal.filter(p => p.categoria === categoria);
+    mostrarProductos(filtrados);
+  }
+
+  cargarDatos();
+</script>
+
+</body>
+</html>

@@ -1,1 +1,2554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administrador - Toque Urbano</title><style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f4f4;
+      color: #222;
+    }
 
+    header {
+      background: #111;
+      color: white;
+      text-align: center;
+      padding: 1.5rem;
+    }
+
+    header h1 {
+      margin: 0;
+      letter-spacing: 4px;
+    }
+
+    main {
+      max-width: 1150px;
+      margin: 2rem auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    h2 {
+      text-align: center;
+      color: #111;
+      border-bottom: 2px solid #c9a227;
+      padding-bottom: 8px;
+    }
+
+    h3 {
+      color: #111;
+      margin-top: 2rem;
+      border-left: 5px solid #c9a227;
+      padding-left: 10px;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    button {
+      background: #111;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      margin: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #c9a227;
+      color: #111;
+    }
+
+    .btn-secundario {
+      background: #555;
+    }
+
+    .btn-peligro {
+      background: #8b0000;
+    }
+
+    .btn-ok {
+      background: #155724;
+    }
+
+    .oculto {
+      display: none;
+    }
+
+    .mensaje {
+      margin-top: 1rem;
+      padding: 12px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .ok {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .acciones {
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+
+    .nota {
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 0.5rem;
+    }
+
+    .preview {
+      margin-top: 1rem;
+      text-align: center;
+      background: #f4f4f4;
+      border-radius: 10px;
+      padding: 1rem;
+      display: none;
+    }
+
+    .preview img {
+      max-width: 100%;
+      max-height: 280px;
+      object-fit: contain;
+      border-radius: 10px;
+    }
+
+    .tabs {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .tabs button {
+      margin: 5px;
+    }
+
+    .tabla-contenedor {
+      overflow-x: auto;
+      margin-top: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+
+    th, td {
+      border-bottom: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+      font-size: 0.9rem;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #111;
+      color: white;
+    }
+
+    .mini-img {
+      width: 55px;
+      height: 70px;
+      object-fit: contain;
+      border-radius: 6px;
+      background: #eee;
+    }
+
+    .estado {
+      padding: 5px 9px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      display: inline-block;
+    }
+
+    .estado-activo {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .estado-oculto {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .estado-agotado {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+
+    .estado-eliminado {
+      background: #343a40;
+      color: #ffffff;
+    }
+
+    .filtros-admin {
+      text-align: center;
+      margin: 1rem 0;
+    }
+
+    .filtros-admin button {
+      background: #555;
+      padding: 9px 14px;
+      font-size: 0.85rem;
+    }
+
+    .filtros-admin button.activo {
+      background: #c9a227;
+      color: #111;
+    }
+
+    .buscador {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+
+
+    .modo-creacion {
+      background: #e9f7ef;
+      color: #155724;
+      border: 1px solid #d4edda;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 1rem 0;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .modo-edicion {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 1rem 0;
+      font-weight: bold;
+      text-align: center;
+    }
+
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin: 2rem 0;
+    }
+
+    .dashboard-card {
+      background: #f7f7f7;
+      border-radius: 12px;
+      padding: 1.2rem;
+      text-align: center;
+      border-left: 5px solid #c9a227;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .dashboard-card .numero {
+      display: block;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #111;
+      margin-bottom: 6px;
+    }
+
+    .dashboard-card .texto {
+      font-size: 0.95rem;
+      color: #555;
+      font-weight: bold;
+    }
+
+    .dashboard-nota {
+      background: #f4f4f4;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-top: 1rem;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .resumen-destacados {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin: 1.5rem 0;
+    }
+
+    .resumen-destacado-card {
+      background: #f7f7f7;
+      border-radius: 10px;
+      padding: 1rem;
+      text-align: center;
+      border-left: 5px solid #c9a227;
+      font-weight: bold;
+    }
+
+    .estrella {
+      color: #c9a227;
+      font-weight: bold;
+    }
+
+    .config-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .papelera-resumen {
+      background: #f7f7f7;
+      border-left: 5px solid #8b0000;
+      padding: 1rem;
+      border-radius: 10px;
+      margin: 1rem 0;
+      font-weight: bold;
+      color: #555;
+    }
+
+
+    .usuario-form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .rol-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #f1f1f1;
+      font-weight: bold;
+      color: #333;
+      font-size: 0.85rem;
+    }
+
+
+    .modo-usuario-creacion {
+      background: #e8f8ee;
+      color: #0f7a32;
+      border-left: 5px solid #0f7a32;
+      padding: 0.9rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      font-weight: bold;
+    }
+
+    .modo-usuario-edicion {
+      background: #fff3cd;
+      color: #856404;
+      border-left: 5px solid #c9a227;
+      padding: 0.9rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      font-weight: bold;
+    }
+
+    @media (max-width: 700px) {
+      main {
+        margin: 1rem;
+        padding: 1rem;
+      }
+
+      header h1 {
+        font-size: 1.4rem;
+      }
+
+      button {
+        width: 100%;
+        margin: 5px 0;
+      }
+    }
+  
+    /* ===== AJUSTE RESPONSIVE ADMIN - MÓVIL / IPHONE ===== */
+    html, body {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        background: #f4f4f4;
+        font-size: 15px;
+      }
+
+      header {
+        padding: 1rem 0.8rem;
+      }
+
+      header h1 {
+        font-size: 1.4rem;
+        letter-spacing: 3px;
+        line-height: 1.2;
+      }
+
+      header p {
+        margin: 0.4rem 0 0;
+        font-size: 0.9rem;
+      }
+
+      main {
+        width: calc(100% - 20px);
+        max-width: 100%;
+        margin: 10px auto;
+        padding: 14px;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      h2 {
+        font-size: 1.45rem;
+        line-height: 1.2;
+        word-break: normal;
+        overflow-wrap: anywhere;
+        margin-top: 0.8rem;
+      }
+
+      h3 {
+        font-size: 1.1rem;
+        line-height: 1.3;
+      }
+
+      .tabs {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-bottom: 1.4rem;
+        width: 100%;
+      }
+
+      .tabs button,
+      button {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 13px 12px;
+        font-size: 0.95rem;
+        border-radius: 10px;
+        white-space: normal;
+        line-height: 1.25;
+      }
+
+      .acciones {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-top: 1rem;
+      }
+
+      .acciones button {
+        margin: 0;
+      }
+
+      .grid,
+      .config-grid,
+      .usuario-form-grid,
+      .dashboard-grid,
+      .resumen-destacados {
+        grid-template-columns: 1fr !important;
+        gap: 12px;
+      }
+
+      input,
+      textarea,
+      select {
+        font-size: 16px;
+        max-width: 100%;
+      }
+
+      textarea {
+        min-height: 95px;
+      }
+
+      .filtros-admin {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        text-align: stretch;
+      }
+
+      .filtros-admin button {
+        width: 100%;
+        margin: 0;
+        font-size: 0.8rem;
+        padding: 10px 8px;
+      }
+
+      .tabla-contenedor {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        background: #fff;
+      }
+
+      table {
+        min-width: 760px;
+      }
+
+      th, td {
+        font-size: 0.82rem;
+        padding: 8px;
+      }
+
+      td button {
+        width: auto;
+        min-width: 92px;
+        margin: 3px 2px;
+        padding: 9px 10px;
+        font-size: 0.78rem;
+      }
+
+      .mini-img {
+        width: 48px;
+        height: 58px;
+      }
+
+      .dashboard-card,
+      .resumen-destacado-card,
+      .papelera-resumen,
+      .dashboard-nota {
+        padding: 1rem;
+      }
+
+      .dashboard-card .numero {
+        font-size: 1.7rem;
+      }
+
+      .preview img {
+        max-height: 220px;
+      }
+
+      .mensaje {
+        font-size: 0.9rem;
+        line-height: 1.35;
+      }
+    }
+
+    @media (max-width: 420px) {
+      main {
+        width: calc(100% - 12px);
+        margin: 6px auto;
+        padding: 10px;
+      }
+
+      h2 {
+        font-size: 1.28rem;
+      }
+
+      .tabs button {
+        font-size: 0.9rem;
+        padding: 12px 10px;
+      }
+
+      .filtros-admin {
+        grid-template-columns: 1fr;
+      }
+
+      table {
+        min-width: 700px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>TOQUE URBANO</h1>
+  <p>Panel Administrador</p>
+</header>
+
+<main>
+
+  <section id="loginBox">
+    <h2>Ingreso Administrador</h2>
+
+    <label>Usuario</label>
+    <input type="text" id="usuario" placeholder="Ejemplo: admin">
+
+    <label>Clave</label>
+    <input type="password" id="clave" placeholder="Ingrese su clave">
+
+    <div class="acciones">
+      <button onclick="login()">Ingresar</button>
+    </div>
+
+    <div id="mensajeLogin"></div>
+  </section>
+
+  <section id="adminBox" class="oculto">
+
+    <div class="tabs">
+      <button onclick="mostrarSeccion('seccionDashboard')">Dashboard</button>
+      <button onclick="mostrarSeccion('seccionCrear')">Agregar Producto</button>
+      <button onclick="mostrarSeccion('seccionProductos')">Productos Registrados</button>
+      <button onclick="mostrarSeccion('seccionCategorias')">Categorías</button>
+      <button onclick="mostrarSeccion('seccionDestacados')">Destacados</button>
+      <button onclick="mostrarSeccion('seccionPapelera')">Papelera</button>
+      <button onclick="mostrarSeccion('seccionConfiguracion')">Configuración</button>
+      <button onclick="mostrarSeccion('seccionUsuarios')">Usuarios</button>
+      <button onclick="cerrarSesion()" class="btn-peligro">Cerrar Sesión</button>
+    </div>
+
+
+    <section id="seccionDashboard">
+      <h2>Dashboard Administrativo</h2>
+
+      <div class="dashboard-grid">
+        <div class="dashboard-card"><span class="numero" id="dashProductosTotal">0</span><span class="texto">Productos totales</span></div>
+        <div class="dashboard-card"><span class="numero" id="dashProductosActivos">0</span><span class="texto">Productos activos</span></div>
+        <div class="dashboard-card"><span class="numero" id="dashProductosAgotados">0</span><span class="texto">Productos agotados</span></div>
+        <div class="dashboard-card"><span class="numero" id="dashProductosOcultos">0</span><span class="texto">Productos ocultos</span></div>
+        <div class="dashboard-card"><span class="numero" id="dashProductosEliminados">0</span><span class="texto">Productos eliminados</span></div>
+        <div class="dashboard-card"><span class="numero" id="dashProductosDestacados">0</span><span class="texto">Productos destacados</span></div>
+        <div class="dashboard-card"><span class="numero" id="dashCategoriasTotal">0</span><span class="texto">Categorías totales</span></div>
+        <div class="dashboard-card"><span class="numero" id="dashCategoriasActivas">0</span><span class="texto">Categorías activas</span></div>
+      </div>
+
+      <div class="acciones">
+        <button onclick="actualizarDashboard()">Actualizar Dashboard</button>
+        <button onclick="mostrarSeccion('seccionProductos')" class="btn-secundario">Ver Productos</button>
+        <button onclick="mostrarSeccion('seccionCategorias')" class="btn-secundario">Ver Categorías</button>
+      </div>
+
+      <div id="mensajeDashboard"></div>
+
+      <div class="dashboard-nota">
+        Este panel resume el estado general del catálogo. No modifica información; solo muestra conteos para controlar productos, categorías, agotados, ocultos, eliminados y destacados.
+      </div>
+    </section>
+
+    <section id="seccionCrear" class="oculto">
+      <h2 id="tituloFormulario">Agregar Producto</h2>
+
+      <div id="modoProductoTexto" class="modo-creacion">
+        Nuevo producto: complete los datos y presione Guardar Producto.
+      </div>
+
+      <input type="hidden" id="modoEdicion" value="crear">
+      <input type="hidden" id="id_producto">
+
+      <div class="grid">
+        <div>
+          <label>Nombre del producto *</label>
+          <input type="text" id="nombre" placeholder="Ejemplo: Jean Slim Azul">
+        </div>
+
+        <div>
+          <label>Categoría *</label>
+          <select id="categoria">
+            <option value="">Seleccione categoría</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Marca</label>
+          <input type="text" id="marca" value="Toque Urbano">
+        </div>
+
+        <div>
+          <label>Género</label>
+          <select id="genero">
+            <option value="Unisex">Unisex</option>
+            <option value="Hombre">Hombre</option>
+            <option value="Mujer">Mujer</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Precio *</label>
+          <input type="number" id="precio" placeholder="Ejemplo: 28" step="0.01">
+        </div>
+
+        <div>
+          <label>Precio oferta</label>
+          <input type="number" id="precio_oferta" placeholder="Opcional" step="0.01">
+        </div>
+
+        <div>
+          <label>Stock</label>
+          <input type="number" id="stock" placeholder="Ejemplo: 5">
+        </div>
+
+        <div>
+          <label>Color</label>
+          <input type="text" id="color" placeholder="Ejemplo: Azul">
+        </div>
+
+        <div>
+          <label>Talla</label>
+          <input type="text" id="talla" placeholder="Ejemplo: M">
+        </div>
+
+        <div>
+          <label>Estado</label>
+          <select id="estado">
+            <option value="activo">Activo</option>
+            <option value="agotado">Agotado</option>
+            <option value="oculto">Oculto</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Destacado</label>
+          <select id="destacado">
+            <option value="no">No</option>
+            <option value="si">Sí</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Descripción</label>
+      <textarea id="descripcion" placeholder="Describe brevemente el producto"></textarea>
+
+      <label>Imagen del producto</label>
+      <input type="file" id="imagenArchivo" accept="image/*" onchange="previsualizarImagen()">
+      <div class="nota">Seleccione una imagen desde su computadora o celular.</div>
+
+      <div class="preview" id="previewBox">
+        <img id="previewImg" src="" alt="Vista previa">
+      </div>
+
+      <label>URL de imagen alternativa</label>
+      <input type="text" id="imagen" placeholder="Opcional: pegue enlace de Google Drive o ruta de imagen">
+      <div class="nota">Use esto solo si no selecciona imagen desde archivo.</div>
+
+      <label>Observación interna</label>
+      <textarea id="observacion" placeholder="Notas internas opcionales"></textarea>
+
+      <div class="acciones">
+        <button id="btnGuardar" onclick="guardarProducto()">Guardar Producto</button>
+        <button onclick="cancelarEdicion()" class="btn-secundario">Nuevo Producto</button>
+      </div>
+
+      <div id="mensajeAdmin"></div>
+    </section>
+
+    <section id="seccionProductos" class="oculto">
+      <h2>Productos Registrados</h2>
+
+      <div class="buscador">
+        <label>Buscar producto</label>
+        <input type="text" id="buscarProducto" placeholder="Buscar por nombre, categoría, código o estado" oninput="filtrarTablaProductos()">
+      </div>
+
+      <div class="filtros-admin">
+        <button class="activo" onclick="filtrarProductosPorEstado('todos', this)">Todos</button>
+        <button onclick="filtrarProductosPorEstado('activo', this)">Activos</button>
+        <button onclick="filtrarProductosPorEstado('agotado', this)">Agotados</button>
+        <button onclick="filtrarProductosPorEstado('oculto', this)">Ocultos</button>
+        <button onclick="filtrarProductosPorEstado('eliminado', this)">Eliminados</button>
+      </div>
+
+      <div class="acciones">
+        <button onclick="cargarProductosAdmin()">Actualizar Lista</button>
+      </div>
+
+      <div id="mensajeProductos"></div>
+
+      <div class="tabla-contenedor">
+        <table>
+          <thead>
+            <tr>
+              <th>Imagen</th>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th>Precio</th>
+              <th>Stock</th>
+              <th>Estado</th>
+              <th>Destacado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaProductos">
+            <tr>
+              <td colspan="8">Cargando productos...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="seccionCategorias" class="oculto">
+      <h2>Administrar Categorías</h2>
+
+      <h3 id="tituloFormularioCategoria">Agregar Categoría</h3>
+
+      <div id="modoCategoriaTexto" class="modo-creacion">
+        Nueva categoría: complete los datos y presione Guardar Categoría.
+      </div>
+
+      <input type="hidden" id="modoCategoria" value="crear">
+      <input type="hidden" id="id_categoria">
+
+      <div class="grid">
+        <div>
+          <label>Nombre de la categoría *</label>
+          <input type="text" id="cat_nombre" placeholder="Ejemplo: Vestidos">
+        </div>
+
+        <div>
+          <label>Estado</label>
+          <select id="cat_estado">
+            <option value="activo">Activo</option>
+            <option value="oculto">Oculto</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Orden</label>
+          <input type="number" id="cat_orden" placeholder="Ejemplo: 6">
+        </div>
+      </div>
+
+      <label>Descripción</label>
+      <textarea id="cat_descripcion" placeholder="Descripción breve de la categoría"></textarea>
+
+      <label>Imagen de categoría</label>
+      <input type="file" id="cat_imagenArchivo" accept="image/*" onchange="previsualizarImagenCategoria()">
+      <div class="nota">Opcional: seleccione una imagen desde su computadora o celular.</div>
+
+      <div class="preview" id="catPreviewBox">
+        <img id="catPreviewImg" src="" alt="Vista previa categoría">
+      </div>
+
+      <label>Imagen URL (Opcional)</label>
+      <input type="text" id="cat_imagen_url" placeholder="Opcional: pegue enlace de Google Drive o URL de imagen">
+      <div class="nota">Use esto solo si no selecciona imagen desde archivo.</div>
+
+      <div class="acciones">
+        <button id="btnGuardarCategoria" onclick="guardarCategoria()">Guardar Categoría</button>
+        <button onclick="limpiarFormularioCategoria()" class="btn-secundario">Nueva Categoría</button>
+      </div>
+
+      <div id="mensajeCategorias"></div>
+
+      <h3>Categorías Registradas</h3>
+
+      <div class="filtros-admin">
+        <button class="activo" onclick="filtrarCategoriasPorEstado('todas', this)">Todas</button>
+        <button onclick="filtrarCategoriasPorEstado('activo', this)">Activas</button>
+        <button onclick="filtrarCategoriasPorEstado('oculto', this)">Ocultas</button>
+        <button onclick="filtrarCategoriasPorEstado('eliminado', this)">Eliminadas</button>
+      </div>
+
+      <div class="acciones">
+        <button onclick="cargarCategoriasAdmin()">Actualizar Categorías</button>
+      </div>
+
+      <div class="tabla-contenedor">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Estado</th>
+              <th>Orden</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaCategorias">
+            <tr>
+              <td colspan="5">Cargando categorías...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="seccionDestacados" class="oculto">
+      <h2>Administrar Productos Destacados</h2>
+
+      <p class="nota">
+        En esta sección no se crean productos nuevos. Aquí se marca o se quita un producto como destacado para usarlo luego en la página principal.
+      </p>
+
+      <div class="resumen-destacados">
+        <div class="resumen-destacado-card" id="resumenDestacadosTotal">Productos: 0</div>
+        <div class="resumen-destacado-card" id="resumenDestacadosSi">Destacados: 0</div>
+        <div class="resumen-destacado-card" id="resumenDestacadosNo">No destacados: 0</div>
+      </div>
+
+      <div class="buscador">
+        <label>Buscar producto</label>
+        <input type="text" id="buscarDestacado" placeholder="Buscar por nombre, categoría o código" oninput="filtrarTablaDestacados()">
+      </div>
+
+      <div class="filtros-admin">
+        <button class="activo" onclick="filtrarDestacadosPorTipo('todos', this)">Todos</button>
+        <button onclick="filtrarDestacadosPorTipo('si', this)">Destacados</button>
+        <button onclick="filtrarDestacadosPorTipo('no', this)">No destacados</button>
+      </div>
+
+      <div class="acciones">
+        <button onclick="cargarDestacados()">Actualizar Destacados</button>
+      </div>
+
+      <div id="mensajeDestacados"></div>
+
+      <div class="tabla-contenedor">
+        <table>
+          <thead>
+            <tr>
+              <th>Imagen</th>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th>Estado</th>
+              <th>Destacado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaDestacados">
+            <tr><td colspan="6">Cargando productos...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="seccionPapelera" class="oculto">
+      <h2>Papelera</h2>
+
+      <div class="papelera-resumen" id="resumenPapelera">
+        Productos eliminados: 0 | Categorías eliminadas: 0
+      </div>
+
+      <p class="nota">
+        La papelera muestra productos y categorías con estado eliminado. Desde aquí puedes restaurarlos sin entrar a Google Sheets.
+      </p>
+
+      <div class="acciones">
+        <button onclick="cargarPapelera()">Actualizar Papelera</button>
+      </div>
+
+      <div id="mensajePapelera"></div>
+
+      <h3>Productos Eliminados</h3>
+      <div class="tabla-contenedor">
+        <table>
+          <thead>
+            <tr>
+              <th>Imagen</th>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th>Precio</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaPapeleraProductos">
+            <tr><td colspan="5">Cargando productos eliminados...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Categorías Eliminadas</h3>
+      <div class="tabla-contenedor">
+        <table>
+          <thead>
+            <tr>
+              <th>Categoría</th>
+              <th>Descripción</th>
+              <th>Orden</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaPapeleraCategorias">
+            <tr><td colspan="4">Cargando categorías eliminadas...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="seccionConfiguracion" class="oculto">
+      <h2>Configuración General</h2>
+
+      <p class="nota">
+        Esta sección permite cambiar datos generales de la tienda sin tocar código ni Google Sheets.
+      </p>
+
+      <div class="config-grid">
+        <div>
+          <label>Nombre de la tienda</label>
+          <input type="text" id="config_nombre_tienda" placeholder="Toque Urbano Boutique">
+        </div>
+
+        <div>
+          <label>WhatsApp</label>
+          <input type="text" id="config_whatsapp" placeholder="593988951244">
+        </div>
+
+        <div>
+          <label>Correo</label>
+          <input type="text" id="config_correo" placeholder="correo@empresa.com">
+        </div>
+
+        <div>
+          <label>Instagram</label>
+          <input type="text" id="config_instagram" placeholder="https://instagram.com/...">
+        </div>
+
+        <div>
+          <label>Facebook</label>
+          <input type="text" id="config_facebook" placeholder="https://facebook.com/...">
+        </div>
+
+        <div>
+          <label>TikTok</label>
+          <input type="text" id="config_tiktok" placeholder="https://tiktok.com/@...">
+        </div>
+      </div>
+
+      <label>Mensaje de WhatsApp</label>
+      <textarea id="config_mensaje_whatsapp" placeholder="Hola, deseo información sobre Toque Urbano."></textarea>
+
+      <label>Texto principal / slogan</label>
+      <textarea id="config_slogan" placeholder="Moda urbana, moderna y elegante para cada ocasión"></textarea>
+
+      <div class="acciones">
+        <button onclick="guardarConfiguracion()">Guardar Configuración</button>
+        <button onclick="cargarConfiguracionAdmin()" class="btn-secundario">Recargar Configuración</button>
+      </div>
+
+      <div id="mensajeConfiguracion"></div>
+    </section>
+
+
+    <section id="seccionUsuarios" class="oculto">
+      <h2>Usuarios del Sistema</h2>
+
+      <p class="nota">
+        Desde aquí puedes crear usuarios, editar datos, activar/desactivar accesos y cambiar claves.
+      </p>
+
+      <h3 id="tituloFormularioUsuario">Nuevo Usuario</h3>
+
+      <div id="modoUsuarioTexto" class="modo-usuario-creacion">
+        Modo creación: estás creando un usuario nuevo.
+      </div>
+
+      <input type="hidden" id="usuario_id">
+
+      <div class="usuario-form-grid">
+        <div>
+          <label>Usuario de acceso</label>
+          <input type="text" id="usuario_usuario" placeholder="Ej: operador1">
+        </div>
+
+        <div>
+          <label>Nombre completo</label>
+          <input type="text" id="usuario_nombre" placeholder="Nombre del usuario">
+        </div>
+
+        <div>
+          <label>Clave</label>
+          <input type="password" id="usuario_clave" placeholder="Clave inicial">
+        </div>
+
+        <div>
+          <label>Rol</label>
+          <select id="usuario_rol">
+            <option value="administrador">Administrador</option>
+            <option value="operador">Operador</option>
+            <option value="consulta">Consulta</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Estado</label>
+          <select id="usuario_estado">
+            <option value="activo">Activo</option>
+            <option value="inactivo">Inactivo</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Observación</label>
+      <textarea id="usuario_observacion" placeholder="Observación interna"></textarea>
+
+      <div class="acciones">
+        <button id="btnGuardarUsuario" onclick="guardarUsuarioAdmin()">Crear Usuario</button>
+        <button id="btnNuevoUsuario" onclick="limpiarFormularioUsuario()" class="btn-secundario">Limpiar Formulario</button>
+        <button onclick="cargarUsuariosAdmin()" class="btn-secundario">Recargar Lista</button>
+      </div>
+
+      <div id="mensajeUsuarios"></div>
+
+      <h3>Usuarios Registrados</h3>
+
+      <div class="buscador">
+        <label>Buscar usuario</label>
+        <input type="text" id="buscarUsuarioAdmin" placeholder="Buscar por usuario, nombre o rol" oninput="filtrarUsuariosAdmin()">
+      </div>
+
+      <div class="filtros-admin">
+        <button class="activo" onclick="filtrarUsuariosPorEstado('todos', this)">Todos</button>
+        <button onclick="filtrarUsuariosPorEstado('activo', this)">Activos</button>
+        <button onclick="filtrarUsuariosPorEstado('inactivo', this)">Inactivos</button>
+      </div>
+
+      <div class="tabla-contenedor">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Usuario</th>
+              <th>Nombre</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>Último acceso</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaUsuariosAdmin">
+            <tr>
+              <td colspan="7">Cargando usuarios...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+
+  </section>
+
+</main>
+
+<script>
+  const API_URL = "https://script.google.com/macros/s/AKfycbwFRRW69sdGzUudNh9SK23v2Fj-5FW5w1MNK62QKWDydbFTb0g_gKEmypBp1oWBl-CI/exec";
+
+  let usuarioActivo = null;
+  let imagenBase64 = "";
+  let imagenNombre = "";
+  let imagenTipo = "";
+  let productosAdminGlobal = [];
+  let categoriasAdminGlobal = [];
+  let filtroProductosActual = "todos";
+  let filtroCategoriasActual = "todas";
+  let filtroDestacadosActual = "todos";
+  let usuariosAdminGlobal = [];
+  let filtroUsuariosActual = "todos";
+  let catImagenBase64 = "";
+  let catImagenNombre = "";
+  let catImagenTipo = "";
+
+  async function login() {
+    const usuario = document.getElementById("usuario").value.trim();
+    const clave = document.getElementById("clave").value.trim();
+
+    if (!usuario || !clave) {
+      mostrarMensaje("mensajeLogin", "Ingrese usuario y clave.", "error");
+      return;
+    }
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          accion: "login",
+          usuario,
+          clave
+        })
+      });
+
+      const json = await res.json();
+
+      if (!json.ok) {
+        mostrarMensaje("mensajeLogin", json.mensaje || "Datos incorrectos.", "error");
+        return;
+      }
+
+      usuarioActivo = json.usuario.usuario;
+
+      document.getElementById("loginBox").classList.add("oculto");
+      document.getElementById("adminBox").classList.remove("oculto");
+
+      await cargarCategorias();
+      await cargarProductosAdmin();
+      await cargarCategoriasAdmin();
+      actualizarDashboard();
+
+    } catch (error) {
+      mostrarMensaje("mensajeLogin", "No se pudo conectar con el servidor.", "error");
+      console.error(error);
+    }
+  }
+
+  function mostrarSeccion(id) {
+    const secciones = [
+      "seccionDashboard",
+      "seccionCrear",
+      "seccionProductos",
+      "seccionCategorias",
+      "seccionDestacados",
+      "seccionPapelera",
+      "seccionConfiguracion",
+      "seccionUsuarios"
+    ];
+
+    secciones.forEach(seccion => {
+      const elemento = document.getElementById(seccion);
+      if (elemento) elemento.classList.add("oculto");
+    });
+
+    document.getElementById(id).classList.remove("oculto");
+
+    if (id === "seccionDashboard") actualizarDashboard();
+    if (id === "seccionProductos") cargarProductosAdmin();
+    if (id === "seccionCategorias") cargarCategoriasAdmin();
+    if (id === "seccionDestacados") cargarDestacados();
+    if (id === "seccionPapelera") cargarPapelera();
+    if (id === "seccionConfiguracion") cargarConfiguracionAdmin();
+    if (id === "seccionUsuarios") cargarUsuariosAdmin();
+  }
+
+  async function cargarCategorias() {
+    try {
+      const res = await fetch(API_URL + "?accion=categorias");
+      const json = await res.json();
+
+      const select = document.getElementById("categoria");
+      select.innerHTML = '<option value="">Seleccione categoría</option>';
+
+      (json.data || []).forEach(cat => {
+        const option = document.createElement("option");
+        option.value = cat.nombre;
+        option.textContent = cat.nombre;
+        select.appendChild(option);
+      });
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function cargarProductosAdmin() {
+    const tbody = document.getElementById("tablaProductos");
+    tbody.innerHTML = '<tr><td colspan="8">Cargando productos...</td></tr>';
+
+    try {
+      const res = await fetch(API_URL + "?accion=productosAdmin");
+      const json = await res.json();
+
+      if (!json.ok) {
+        tbody.innerHTML = '<tr><td colspan="8">No se pudo cargar productos.</td></tr>';
+        mostrarMensaje("mensajeProductos", json.mensaje || "Error al cargar productos.", "error");
+        return;
+      }
+
+      productosAdminGlobal = json.data || [];
+      aplicarFiltrosProductos();
+
+    } catch (error) {
+      tbody.innerHTML = '<tr><td colspan="8">Error de conexión.</td></tr>';
+      mostrarMensaje("mensajeProductos", "Error al conectar con el servidor.", "error");
+      console.error(error);
+    }
+  }
+
+  function renderizarTablaProductos(productos) {
+    const tbody = document.getElementById("tablaProductos");
+    tbody.innerHTML = "";
+
+    if (!productos || productos.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8">No hay productos registrados.</td></tr>';
+      return;
+    }
+
+    productos.forEach(producto => {
+      const imagen = convertirImagenDrive(producto.imagen_principal_url || producto.imagen_variante_url);
+      const estadoClase = obtenerClaseEstado(producto.estado);
+      const precio = producto.precio ? "$" + Number(producto.precio).toFixed(2) : "Sin precio";
+      const stock = producto.stock !== "" ? producto.stock : "0";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><img src="${imagen}" class="mini-img" alt="${producto.nombre || 'Producto'}"></td>
+        <td>
+          <strong>${producto.nombre || ''}</strong><br>
+          <small>${producto.codigo_producto || ''}</small>
+        </td>
+        <td>${producto.categoria || ''}</td>
+        <td>${precio}</td>
+        <td>${stock}</td>
+        <td><span class="estado ${estadoClase}">${producto.estado || ''}</span></td>
+        <td>${producto.destacado || 'no'}</td>
+        <td>
+          <button onclick="editarProducto('${producto.id_producto}')">Editar</button>
+          <button onclick="cambiarEstadoRapido('${producto.id_producto}', 'activo')" class="btn-ok">Activar</button>
+          <button onclick="cambiarEstadoRapido('${producto.id_producto}', 'agotado')" class="btn-secundario">Agotado</button>
+          <button onclick="cambiarEstadoRapido('${producto.id_producto}', 'oculto')" class="btn-peligro">Ocultar</button>
+          <button onclick="eliminarProductoLogico('${producto.id_producto}')" class="btn-peligro">Eliminar</button>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function obtenerClaseEstado(estado) {
+    if (estado === "activo") return "estado-activo";
+    if (estado === "oculto") return "estado-oculto";
+    if (estado === "agotado") return "estado-agotado";
+    if (estado === "eliminado") return "estado-eliminado";
+    return "";
+  }
+
+  function filtrarTablaProductos() {
+    aplicarFiltrosProductos();
+  }
+
+  function filtrarProductosPorEstado(estado, boton) {
+    filtroProductosActual = estado;
+
+    document.querySelectorAll("#seccionProductos .filtros-admin button").forEach(btn => btn.classList.remove("activo"));
+    boton.classList.add("activo");
+
+    aplicarFiltrosProductos();
+  }
+
+  function aplicarFiltrosProductos() {
+    const texto = document.getElementById("buscarProducto").value.toLowerCase().trim();
+
+    const filtrados = productosAdminGlobal.filter(p => {
+      const coincideTexto =
+        !texto ||
+        String(p.nombre || "").toLowerCase().includes(texto) ||
+        String(p.categoria || "").toLowerCase().includes(texto) ||
+        String(p.codigo_producto || "").toLowerCase().includes(texto) ||
+        String(p.estado || "").toLowerCase().includes(texto);
+
+      const coincideEstado =
+        filtroProductosActual === "todos" ||
+        String(p.estado || "").toLowerCase() === filtroProductosActual;
+
+      return coincideTexto && coincideEstado;
+    });
+
+    renderizarTablaProductos(filtrados);
+  }
+
+  function editarProducto(idProducto) {
+    const producto = productosAdminGlobal.find(p => p.id_producto === idProducto);
+
+    if (!producto) {
+      mostrarMensaje("mensajeProductos", "No se encontró el producto.", "error");
+      return;
+    }
+
+    document.getElementById("modoEdicion").value = "editar";
+    document.getElementById("id_producto").value = producto.id_producto || "";
+
+    document.getElementById("nombre").value = producto.nombre || "";
+    document.getElementById("categoria").value = producto.categoria || "";
+    document.getElementById("marca").value = producto.marca || "Toque Urbano";
+    document.getElementById("genero").value = producto.genero || "Unisex";
+    document.getElementById("precio").value = producto.precio || "";
+    document.getElementById("precio_oferta").value = producto.precio_oferta || "";
+    document.getElementById("stock").value = producto.stock || "";
+    document.getElementById("color").value = producto.color || "";
+    document.getElementById("talla").value = producto.talla || "";
+    document.getElementById("estado").value = producto.estado || "activo";
+    document.getElementById("destacado").value = producto.destacado || "no";
+    document.getElementById("descripcion").value = producto.descripcion || "";
+    document.getElementById("imagen").value = producto.imagen_principal_url || "";
+    document.getElementById("observacion").value = producto.observacion || "";
+
+    const imagen = convertirImagenDrive(producto.imagen_principal_url || producto.imagen_variante_url);
+
+    if (imagen) {
+      document.getElementById("previewImg").src = imagen;
+      document.getElementById("previewBox").style.display = "block";
+    }
+
+    imagenBase64 = "";
+    imagenNombre = "";
+    imagenTipo = "";
+
+    document.getElementById("tituloFormulario").innerText = "Editar Producto";
+    document.getElementById("btnGuardar").innerText = "Actualizar Producto";
+    document.getElementById("modoProductoTexto").className = "modo-edicion";
+    document.getElementById("modoProductoTexto").innerText = "Editando producto: " + (producto.nombre || "");
+
+    mostrarSeccion("seccionCrear");
+    mostrarMensaje("mensajeAdmin", "Editando producto: " + (producto.nombre || ""), "ok");
+  }
+
+  async function cambiarEstadoRapido(idProducto, estado) {
+    if (!confirm("¿Seguro que desea cambiar el estado a " + estado + "?")) {
+      return;
+    }
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          accion: "cambiarEstadoProducto",
+          usuario: usuarioActivo || "admin",
+          id_producto: idProducto,
+          estado: estado
+        })
+      });
+
+      const json = await res.json();
+
+      if (!json.ok) {
+        mostrarMensaje("mensajeProductos", json.mensaje || "No se pudo cambiar el estado.", "error");
+        return;
+      }
+
+      mostrarMensaje("mensajeProductos", "Estado actualizado correctamente.", "ok");
+      cargarProductosAdmin();
+
+    } catch (error) {
+      mostrarMensaje("mensajeProductos", "Error al conectar con el servidor.", "error");
+      console.error(error);
+    }
+  }
+
+
+  async function eliminarProductoLogico(idProducto) {
+    const producto = productosAdminGlobal.find(p => p.id_producto === idProducto);
+    const nombre = producto ? producto.nombre : "este producto";
+
+    if (!confirm("¿Seguro que desea eliminar " + nombre + "?\n\nEl producto no se borrará definitivamente, solo quedará con estado eliminado.")) {
+      return;
+    }
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          accion: "cambiarEstadoProducto",
+          usuario: usuarioActivo || "admin",
+          id_producto: idProducto,
+          estado: "eliminado"
+        })
+      });
+
+      const json = await res.json();
+
+      if (!json.ok) {
+        mostrarMensaje("mensajeProductos", json.mensaje || "No se pudo eliminar el producto.", "error");
+        return;
+      }
+
+      mostrarMensaje("mensajeProductos", "Producto eliminado correctamente.", "ok");
+      cargarProductosAdmin();
+
+    } catch (error) {
+      mostrarMensaje("mensajeProductos", "Error al conectar con el servidor.", "error");
+      console.error(error);
+    }
+  }
+
+  async function cargarCategoriasAdmin() {
+    const tbody = document.getElementById("tablaCategorias");
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="5">Cargando categorías...</td></tr>';
+
+    try {
+      const res = await fetch(API_URL + "?accion=categoriasAdmin");
+      const json = await res.json();
+
+      if (!json.ok) {
+        tbody.innerHTML = '<tr><td colspan="5">No se pudo cargar categorías.</td></tr>';
+        mostrarMensaje("mensajeCategorias", json.mensaje || "Error al cargar categorías.", "error");
+        return;
+      }
+
+      categoriasAdminGlobal = json.data || [];
+      aplicarFiltrosCategorias();
+
+    } catch (error) {
+      tbody.innerHTML = '<tr><td colspan="5">Error de conexión.</td></tr>';
+      mostrarMensaje("mensajeCategorias", "Error al conectar con el servidor.", "error");
+      console.error(error);
+    }
+  }
+
+  function renderizarTablaCategorias(categorias) {
+    const tbody = document.getElementById("tablaCategorias");
+    tbody.innerHTML = "";
+
+    if (!categorias || categorias.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5">No hay categorías registradas.</td></tr>';
+      return;
+    }
+
+    categorias.forEach(categoria => {
+      const estadoClase = obtenerClaseEstado(categoria.estado);
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>
+          <strong>${categoria.nombre || ''}</strong><br>
+          <small>${categoria.id_categoria || ''}</small>
+        </td>
+        <td>${categoria.descripcion || ''}</td>
+        <td><span class="estado ${estadoClase}">${categoria.estado || ''}</span></td>
+        <td>${categoria.orden || ''}</td>
+        <td>
+          <button onclick="editarCategoria('${categoria.id_categoria}')">Editar</button>
+          <button onclick="cambiarEstadoCategoriaRapido('${categoria.id_categoria}', 'activo')" class="btn-ok">Activar</button>
+          <button onclick="cambiarEstadoCategoriaRapido('${categoria.id_categoria}', 'oculto')" class="btn-peligro">Ocultar</button>
+          <button onclick="eliminarCategoriaLogica('${categoria.id_categoria}')" class="btn-peligro">Eliminar</button>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+  }
+
+
+  function filtrarCategoriasPorEstado(estado, boton) {
+    filtroCategoriasActual = estado;
+
+    document.querySelectorAll("#seccionCategorias .filtros-admin button").forEach(btn => btn.classList.remove("activo"));
+    boton.classList.add("activo");
+
+    aplicarFiltrosCategorias();
+  }
+
+  function aplicarFiltrosCategorias() {
+    let categorias = categoriasAdminGlobal;
+
+    if (filtroCategoriasActual !== "todas") {
+      categorias = categoriasAdminGlobal.filter(c =>
+        String(c.estado || "").toLowerCase() === filtroCategoriasActual
+      );
+    }
+
+    renderizarTablaCategorias(categorias);
+  }
+
+  function editarCategoria(idCategoria) {
+    const categoria = categoriasAdminGlobal.find(c => c.id_categoria === idCategoria);
+
+    if (!categoria) {
+      mostrarMensaje("mensajeCategorias", "No se encontró la categoría.", "error");
+      return;
+    }
+
+    document.getElementById("modoCategoria").value = "editar";
+    document.getElementById("id_categoria").value = categoria.id_categoria || "";
+    document.getElementById("cat_nombre").value = categoria.nombre || "";
+    document.getElementById("cat_descripcion").value = categoria.descripcion || "";
+    document.getElementById("cat_imagen_url").value = categoria.imagen_url || "";
+    document.getElementById("cat_estado").value = categoria.estado || "activo";
+    document.getElementById("cat_orden").value = categoria.orden || "";
+
+    const imagenCategoria = convertirImagenDrive(categoria.imagen_url || "");
+    if (categoria.imagen_url) {
+      document.getElementById("catPreviewImg").src = imagenCategoria;
+      document.getElementById("catPreviewBox").style.display = "block";
+    }
+
+    catImagenBase64 = "";
+    catImagenNombre = "";
+    catImagenTipo = "";
+
+    document.getElementById("tituloFormularioCategoria").innerText = "Editar Categoría";
+    document.getElementById("btnGuardarCategoria").innerText = "Actualizar Categoría";
+    document.getElementById("modoCategoriaTexto").className = "modo-edicion";
+    document.getElementById("modoCategoriaTexto").innerText = "Editando categoría: " + (categoria.nombre || "");
+
+    mostrarMensaje("mensajeCategorias", "Editando categoría: " + (categoria.nombre || ""), "ok");
+  }
+
+  async function guardarCategoria() {
+    const modo = document.getElementById("modoCategoria").value;
+    const nombre = document.getElementById("cat_nombre").value.trim();
+
+    if (!nombre) {
+      mostrarMensaje("mensajeCategorias", "El nombre de la categoría es obligatorio.", "error");
+      return;
+    }
+
+    const data = {
+      accion: modo === "editar" ? "actualizarCategoria" : "guardarCategoria",
+      usuario: usuarioActivo || "admin",
+      id_categoria: document.getElementById("id_categoria").value,
+      nombre,
+      descripcion: document.getElementById("cat_descripcion").value.trim(),
+      imagen_url: document.getElementById("cat_imagen_url").value.trim(),
+      imagen_base64: catImagenBase64,
+      imagen_nombre: catImagenNombre,
+      imagen_tipo: catImagenTipo,
+      estado: document.getElementById("cat_estado").value,
+      orden: document.getElementById("cat_orden").value
+    };
+
+    mostrarMensaje("mensajeCategorias", modo === "editar" ? "Guardando cambios..." : "Guardando categoría...", "ok");
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
+
+      const json = await res.json();
+
+      if (!json.ok) {
+        mostrarMensaje("mensajeCategorias", json.mensaje || "No se pudo guardar la categoría.", "error");
+        return;
+      }
+
+      mostrarMensaje("mensajeCategorias", modo === "editar" ? "Categoría actualizada correctamente." : "Categoría creada correctamente.", "ok");
+      limpiarFormularioCategoria();
+      await cargarCategoriasAdmin();
+      await cargarCategorias();
+
+    } catch (error) {
+      mostrarMensaje("mensajeCategorias", "Error al conectar con el servidor.", "error");
+      console.error(error);
+    }
+  }
+
+  async function cambiarEstadoCategoriaRapido(idCategoria, estado) {
+    if (!confirm("¿Seguro que desea cambiar la categoría a " + estado + "?")) {
+      return;
+    }
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          accion: "cambiarEstadoCategoria",
+          usuario: usuarioActivo || "admin",
+          id_categoria: idCategoria,
+          estado
+        })
+      });
+
+      const json = await res.json();
+
+      if (!json.ok) {
+        mostrarMensaje("mensajeCategorias", json.mensaje || "No se pudo cambiar el estado.", "error");
+        return;
+      }
+
+      mostrarMensaje("mensajeCategorias", "Estado de categoría actualizado correctamente.", "ok");
+      await cargarCategoriasAdmin();
+      await cargarCategorias();
+
+    } catch (error) {
+      mostrarMensaje("mensajeCategorias", "Error al conectar con el servidor.", "error");
+      console.error(error);
+    }
+  }
+
+
+  async function eliminarCategoriaLogica(idCategoria) {
+    const categoria = categoriasAdminGlobal.find(c => c.id_categoria === idCategoria);
+    const nombre = categoria ? categoria.nombre : "esta categoría";
+
+    if (!confirm("¿Seguro que desea eliminar " + nombre + "?\n\nLa categoría no se borrará definitivamente, solo quedará con estado eliminado.")) {
+      return;
+    }
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          accion: "cambiarEstadoCategoria",
+          usuario: usuarioActivo || "admin",
+          id_categoria: idCategoria,
+          estado: "eliminado"
+        })
+      });
+
+      const json = await res.json();
+
+      if (!json.ok) {
+        mostrarMensaje("mensajeCategorias", json.mensaje || "No se pudo eliminar la categoría.", "error");
+        return;
+      }
+
+      mostrarMensaje("mensajeCategorias", "Categoría eliminada correctamente.", "ok");
+      await cargarCategoriasAdmin();
+      await cargarCategorias();
+
+    } catch (error) {
+      mostrarMensaje("mensajeCategorias", "Error al conectar con el servidor.", "error");
+      console.error(error);
+    }
+  }
+
+  function limpiarFormularioCategoria() {
+    document.getElementById("modoCategoria").value = "crear";
+    document.getElementById("id_categoria").value = "";
+    document.getElementById("cat_nombre").value = "";
+    document.getElementById("cat_descripcion").value = "";
+    document.getElementById("cat_imagenArchivo").value = "";
+    document.getElementById("cat_imagen_url").value = "";
+    document.getElementById("catPreviewImg").src = "";
+    document.getElementById("catPreviewBox").style.display = "none";
+    document.getElementById("cat_estado").value = "activo";
+    document.getElementById("cat_orden").value = "";
+
+    catImagenBase64 = "";
+    catImagenNombre = "";
+    catImagenTipo = "";
+
+    document.getElementById("tituloFormularioCategoria").innerText = "Agregar Categoría";
+    document.getElementById("btnGuardarCategoria").innerText = "Guardar Categoría";
+    document.getElementById("modoCategoriaTexto").className = "modo-creacion";
+    document.getElementById("modoCategoriaTexto").innerText = "Nueva categoría: complete los datos y presione Guardar Categoría.";
+  }
+
+
+  function previsualizarImagenCategoria() {
+    const archivo = document.getElementById("cat_imagenArchivo").files[0];
+
+    if (!archivo) return;
+
+    catImagenNombre = archivo.name;
+    catImagenTipo = archivo.type;
+
+    const lector = new FileReader();
+
+    lector.onload = function(e) {
+      const resultado = e.target.result;
+      document.getElementById("catPreviewImg").src = resultado;
+      document.getElementById("catPreviewBox").style.display = "block";
+
+      catImagenBase64 = resultado.split(",")[1];
+
+      // Si se selecciona archivo, dejamos la URL opcional vacía para evitar confusión.
+      document.getElementById("cat_imagen_url").value = "";
+    };
+
+    lector.readAsDataURL(archivo);
+  }
+
+  function previsualizarImagen() {
+    const archivo = document.getElementById("imagenArchivo").files[0];
+
+    if (!archivo) return;
+
+    imagenNombre = archivo.name;
+    imagenTipo = archivo.type;
+
+    const lector = new FileReader();
+
+    lector.onload = function(e) {
+      const resultado = e.target.result;
+      document.getElementById("previewImg").src = resultado;
+      document.getElementById("previewBox").style.display = "block";
+
+      imagenBase64 = resultado.split(",")[1];
+    };
+
+    lector.readAsDataURL(archivo);
+  }
+
+  async function guardarProducto() {
+    const modo = document.getElementById("modoEdicion").value;
+    const nombre = document.getElementById("nombre").value.trim();
+    const categoria = document.getElementById("categoria").value;
+    const precio = document.getElementById("precio").value;
+
+    if (!nombre || !categoria || !precio) {
+      mostrarMensaje("mensajeAdmin", "Nombre, categoría y precio son obligatorios.", "error");
+      return;
+    }
+
+    const data = {
+      accion: modo === "editar" ? "actualizarProducto" : "guardarProducto",
+      usuario: usuarioActivo || "admin",
+      id_producto: document.getElementById("id_producto").value,
+      nombre,
+      categoria,
+      marca: document.getElementById("marca").value.trim(),
+      genero: document.getElementById("genero").value,
+      descripcion: document.getElementById("descripcion").value.trim(),
+      imagen_principal_url: document.getElementById("imagen").value.trim(),
+      imagen_base64: imagenBase64,
+      imagen_nombre: imagenNombre,
+      imagen_tipo: imagenTipo,
+      estado: document.getElementById("estado").value,
+      destacado: document.getElementById("destacado").value,
+      precio,
+      precio_oferta: document.getElementById("precio_oferta").value,
+      stock: document.getElementById("stock").value,
+      color: document.getElementById("color").value.trim(),
+      talla: document.getElementById("talla").value.trim(),
+      estado_variante: "activo",
+      observacion: document.getElementById("observacion").value.trim()
+    };
+
+    mostrarMensaje("mensajeAdmin", modo === "editar" ? "Guardando cambios..." : "Guardando producto, espere...", "ok");
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
+
+      const json = await res.json();
+
+      if (!json.ok) {
+        mostrarMensaje("mensajeAdmin", json.mensaje || "No se pudo guardar.", "error");
+        return;
+      }
+
+      mostrarMensaje("mensajeAdmin", modo === "editar" ? "Producto actualizado correctamente." : "Producto creado correctamente.", "ok");
+      limpiarFormulario();
+      cargarProductosAdmin();
+
+    } catch (error) {
+      mostrarMensaje("mensajeAdmin", "Error al conectar con el servidor.", "error");
+      console.error(error);
+    }
+  }
+
+  function cancelarEdicion() {
+    limpiarFormulario();
+    mostrarMensaje("mensajeAdmin", "Formulario limpio.", "ok");
+  }
+
+  function limpiarFormulario() {
+    document.getElementById("modoEdicion").value = "crear";
+    document.getElementById("id_producto").value = "";
+    document.getElementById("nombre").value = "";
+    document.getElementById("categoria").value = "";
+    document.getElementById("marca").value = "Toque Urbano";
+    document.getElementById("genero").value = "Unisex";
+    document.getElementById("precio").value = "";
+    document.getElementById("precio_oferta").value = "";
+    document.getElementById("stock").value = "";
+    document.getElementById("color").value = "";
+    document.getElementById("talla").value = "";
+    document.getElementById("descripcion").value = "";
+    document.getElementById("imagen").value = "";
+    document.getElementById("imagenArchivo").value = "";
+    document.getElementById("observacion").value = "";
+    document.getElementById("estado").value = "activo";
+    document.getElementById("destacado").value = "no";
+    document.getElementById("previewImg").src = "";
+    document.getElementById("previewBox").style.display = "none";
+
+    document.getElementById("tituloFormulario").innerText = "Agregar Producto";
+    document.getElementById("btnGuardar").innerText = "Guardar Producto";
+    document.getElementById("modoProductoTexto").className = "modo-creacion";
+    document.getElementById("modoProductoTexto").innerText = "Nuevo producto: complete los datos y presione Guardar Producto.";
+
+    imagenBase64 = "";
+    imagenNombre = "";
+    imagenTipo = "";
+  }
+
+  function cerrarSesion() {
+    usuarioActivo = null;
+    document.getElementById("adminBox").classList.add("oculto");
+    document.getElementById("loginBox").classList.remove("oculto");
+    document.getElementById("clave").value = "";
+    mostrarMensaje("mensajeLogin", "Sesión cerrada.", "ok");
+  }
+
+  function mostrarMensaje(id, texto, tipo) {
+    const div = document.getElementById(id);
+    div.className = "mensaje " + tipo;
+    div.innerText = texto;
+  }
+
+
+  async function actualizarDashboard() {
+    try {
+      if (!productosAdminGlobal || productosAdminGlobal.length === 0) await cargarProductosAdmin();
+      if (!categoriasAdminGlobal || categoriasAdminGlobal.length === 0) await cargarCategoriasAdmin();
+
+      const productos = productosAdminGlobal || [];
+      const categorias = categoriasAdminGlobal || [];
+
+      const contarProductos = estado => productos.filter(p => String(p.estado || "").toLowerCase() === estado).length;
+      const productosDestacados = productos.filter(p => String(p.destacado || "no").toLowerCase() === "si").length;
+      const categoriasActivas = categorias.filter(c => String(c.estado || "").toLowerCase() === "activo").length;
+
+      document.getElementById("dashProductosTotal").innerText = productos.length;
+      document.getElementById("dashProductosActivos").innerText = contarProductos("activo");
+      document.getElementById("dashProductosAgotados").innerText = contarProductos("agotado");
+      document.getElementById("dashProductosOcultos").innerText = contarProductos("oculto");
+      document.getElementById("dashProductosEliminados").innerText = contarProductos("eliminado");
+      document.getElementById("dashProductosDestacados").innerText = productosDestacados;
+      document.getElementById("dashCategoriasTotal").innerText = categorias.length;
+      document.getElementById("dashCategoriasActivas").innerText = categoriasActivas;
+
+      mostrarMensaje("mensajeDashboard", "Dashboard actualizado correctamente.", "ok");
+
+    } catch (error) {
+      mostrarMensaje("mensajeDashboard", "No se pudo actualizar el dashboard.", "error");
+      console.error(error);
+    }
+  }
+
+  async function cargarDestacados() {
+    const tbody = document.getElementById("tablaDestacados");
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="6">Cargando productos...</td></tr>';
+
+    try {
+      await cargarProductosAdmin();
+      aplicarFiltrosDestacados();
+      actualizarResumenDestacados(productosAdminGlobal);
+    } catch (error) {
+      tbody.innerHTML = '<tr><td colspan="6">Error al cargar destacados.</td></tr>';
+      mostrarMensaje("mensajeDestacados", "Error al cargar productos destacados.", "error");
+      console.error(error);
+    }
+  }
+
+  function renderizarTablaDestacados(productos) {
+    const tbody = document.getElementById("tablaDestacados");
+    tbody.innerHTML = "";
+
+    if (!productos || productos.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6">No hay productos para mostrar.</td></tr>';
+      return;
+    }
+
+    productos.forEach(producto => {
+      const imagen = convertirImagenDrive(producto.imagen_principal_url || producto.imagen_variante_url);
+      const estadoClase = obtenerClaseEstado(producto.estado);
+      const destacado = String(producto.destacado || "no").toLowerCase();
+      const esDestacado = destacado === "si";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><img src="${imagen}" class="mini-img" alt="${producto.nombre || 'Producto'}"></td>
+        <td><strong>${producto.nombre || ''}</strong><br><small>${producto.codigo_producto || ''}</small></td>
+        <td>${producto.categoria || ''}</td>
+        <td><span class="estado ${estadoClase}">${producto.estado || ''}</span></td>
+        <td>${esDestacado ? '<span class="estrella">⭐ Sí</span>' : 'No'}</td>
+        <td>
+          ${
+            esDestacado
+              ? `<button onclick="cambiarDestacadoRapido('${producto.id_producto}', 'no')" class="btn-secundario">Quitar destacado</button>`
+              : `<button onclick="cambiarDestacadoRapido('${producto.id_producto}', 'si')" class="btn-ok">Marcar destacado</button>`
+          }
+          <button onclick="editarProducto('${producto.id_producto}')">Editar producto</button>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function filtrarDestacadosPorTipo(tipo, boton) {
+    filtroDestacadosActual = tipo;
+    document.querySelectorAll("#seccionDestacados .filtros-admin button").forEach(btn => btn.classList.remove("activo"));
+    boton.classList.add("activo");
+    aplicarFiltrosDestacados();
+  }
+
+  function filtrarTablaDestacados() {
+    aplicarFiltrosDestacados();
+  }
+
+  function aplicarFiltrosDestacados() {
+    const texto = document.getElementById("buscarDestacado").value.toLowerCase().trim();
+
+    const productos = productosAdminGlobal.filter(p => {
+      const coincideTexto =
+        !texto ||
+        String(p.nombre || "").toLowerCase().includes(texto) ||
+        String(p.categoria || "").toLowerCase().includes(texto) ||
+        String(p.codigo_producto || "").toLowerCase().includes(texto);
+
+      const destacado = String(p.destacado || "no").toLowerCase();
+      const coincideDestacado = filtroDestacadosActual === "todos" || destacado === filtroDestacadosActual;
+
+      return coincideTexto && coincideDestacado;
+    });
+
+    renderizarTablaDestacados(productos);
+    actualizarResumenDestacados(productosAdminGlobal);
+  }
+
+  function actualizarResumenDestacados(productos) {
+    const total = productos.length;
+    const destacados = productos.filter(p => String(p.destacado || "no").toLowerCase() === "si").length;
+    const noDestacados = total - destacados;
+
+    document.getElementById("resumenDestacadosTotal").innerText = "Productos: " + total;
+    document.getElementById("resumenDestacadosSi").innerText = "Destacados: " + destacados;
+    document.getElementById("resumenDestacadosNo").innerText = "No destacados: " + noDestacados;
+  }
+
+  async function cambiarDestacadoRapido(idProducto, destacado) {
+    const producto = productosAdminGlobal.find(p => p.id_producto === idProducto);
+
+    if (!producto) {
+      mostrarMensaje("mensajeDestacados", "No se encontró el producto.", "error");
+      return;
+    }
+
+    const textoAccion = destacado === "si" ? "marcar como destacado" : "quitar de destacados";
+    if (!confirm("¿Seguro que desea " + textoAccion + " este producto?")) return;
+
+    const data = {
+      accion: "actualizarProducto",
+      usuario: usuarioActivo || "admin",
+      id_producto: producto.id_producto,
+      nombre: producto.nombre || "",
+      categoria: producto.categoria || "",
+      marca: producto.marca || "Toque Urbano",
+      genero: producto.genero || "Unisex",
+      descripcion: producto.descripcion || "",
+      imagen_principal_url: producto.imagen_principal_url || producto.imagen_variante_url || "",
+      estado: producto.estado || "activo",
+      destacado: destacado,
+      precio: producto.precio || 0,
+      precio_oferta: producto.precio_oferta || "",
+      stock: producto.stock || 0,
+      color: producto.color || "",
+      talla: producto.talla || "",
+      estado_variante: producto.estado_variante || "activo",
+      observacion: producto.observacion || ""
+    };
+
+    try {
+      const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(data) });
+      const json = await res.json();
+
+      if (!json.ok) {
+        mostrarMensaje("mensajeDestacados", json.mensaje || "No se pudo actualizar destacado.", "error");
+        return;
+      }
+
+      mostrarMensaje("mensajeDestacados", destacado === "si" ? "Producto marcado como destacado." : "Producto quitado de destacados.", "ok");
+      await cargarProductosAdmin();
+      aplicarFiltrosDestacados();
+      actualizarDashboard();
+
+    } catch (error) {
+      mostrarMensaje("mensajeDestacados", "Error al conectar con el servidor.", "error");
+      console.error(error);
+    }
+  }
+
+  async function cargarPapelera() {
+    try {
+      await cargarProductosAdmin();
+      await cargarCategoriasAdmin();
+
+      const productosEliminados = productosAdminGlobal.filter(p => String(p.estado || "").toLowerCase() === "eliminado");
+      const categoriasEliminadas = categoriasAdminGlobal.filter(c => String(c.estado || "").toLowerCase() === "eliminado");
+
+      document.getElementById("resumenPapelera").innerText =
+        "Productos eliminados: " + productosEliminados.length +
+        " | Categorías eliminadas: " + categoriasEliminadas.length;
+
+      renderizarPapeleraProductos(productosEliminados);
+      renderizarPapeleraCategorias(categoriasEliminadas);
+
+    } catch (error) {
+      mostrarMensaje("mensajePapelera", "No se pudo cargar la papelera.", "error");
+      console.error(error);
+    }
+  }
+
+  function renderizarPapeleraProductos(productos) {
+    const tbody = document.getElementById("tablaPapeleraProductos");
+    tbody.innerHTML = "";
+
+    if (!productos || productos.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5">No hay productos eliminados.</td></tr>';
+      return;
+    }
+
+    productos.forEach(producto => {
+      const imagen = convertirImagenDrive(producto.imagen_principal_url || producto.imagen_variante_url);
+      const precio = producto.precio ? "$" + Number(producto.precio).toFixed(2) : "Sin precio";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><img src="${imagen}" class="mini-img" alt="${producto.nombre || 'Producto'}"></td>
+        <td><strong>${producto.nombre || ''}</strong><br><small>${producto.codigo_producto || ''}</small></td>
+        <td>${producto.categoria || ''}</td>
+        <td>${precio}</td>
+        <td><button onclick="restaurarProducto('${producto.id_producto}')" class="btn-ok">Restaurar</button></td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderizarPapeleraCategorias(categorias) {
+    const tbody = document.getElementById("tablaPapeleraCategorias");
+    tbody.innerHTML = "";
+
+    if (!categorias || categorias.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4">No hay categorías eliminadas.</td></tr>';
+      return;
+    }
+
+    categorias.forEach(categoria => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><strong>${categoria.nombre || ''}</strong><br><small>${categoria.id_categoria || ''}</small></td>
+        <td>${categoria.descripcion || ''}</td>
+        <td>${categoria.orden || ''}</td>
+        <td><button onclick="restaurarCategoria('${categoria.id_categoria}')" class="btn-ok">Restaurar</button></td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function restaurarProducto(idProducto) {
+    if (!confirm("¿Seguro que desea restaurar este producto?")) return;
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          accion: "cambiarEstadoProducto",
+          usuario: usuarioActivo || "admin",
+          id_producto: idProducto,
+          estado: "activo"
+        })
+      });
+
+      const json = await res.json();
+
+      if (!json.ok) {
+        mostrarMensaje("mensajePapelera", json.mensaje || "No se pudo restaurar el producto.", "error");
+        return;
+      }
+
+      mostrarMensaje("mensajePapelera", "Producto restaurado correctamente.", "ok");
+      await cargarPapelera();
+      actualizarDashboard();
+
+    } catch (error) {
+      mostrarMensaje("mensajePapelera", "Error al conectar con el servidor.", "error");
+      console.error(error);
+    }
+  }
+
+  async function restaurarCategoria(idCategoria) {
+    if (!confirm("¿Seguro que desea restaurar esta categoría?")) return;
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          accion: "cambiarEstadoCategoria",
+          usuario: usuarioActivo || "admin",
+          id_categoria: idCategoria,
+          estado: "activo"
+        })
+      });
+
+      const json = await res.json();
+
+      if (!json.ok) {
+        mostrarMensaje("mensajePapelera", json.mensaje || "No se pudo restaurar la categoría.", "error");
+        return;
+      }
+
+      mostrarMensaje("mensajePapelera", "Categoría restaurada correctamente.", "ok");
+      await cargarPapelera();
+      await cargarCategorias();
+      actualizarDashboard();
+
+    } catch (error) {
+      mostrarMensaje("mensajePapelera", "Error al conectar con el servidor.", "error");
+      console.error(error);
+    }
+  }
+
+  async function cargarConfiguracionAdmin() {
+    try {
+      const res = await fetch(API_URL + "?accion=configuracion");
+      const json = await res.json();
+
+      if (!json.ok) {
+        mostrarMensaje("mensajeConfiguracion", json.mensaje || "No se pudo cargar configuración.", "error");
+        return;
+      }
+
+      const config = json.data || {};
+
+      document.getElementById("config_nombre_tienda").value = config.nombre_tienda || "";
+      document.getElementById("config_whatsapp").value = config.whatsapp || "";
+      document.getElementById("config_correo").value = config.correo || "";
+      document.getElementById("config_instagram").value = config.instagram || "";
+      document.getElementById("config_facebook").value = config.facebook || "";
+      document.getElementById("config_tiktok").value = config.tiktok || "";
+      document.getElementById("config_mensaje_whatsapp").value = config.mensaje_whatsapp || "";
+      document.getElementById("config_slogan").value = config.slogan || "";
+
+      mostrarMensaje("mensajeConfiguracion", "Configuración cargada correctamente.", "ok");
+
+    } catch (error) {
+      mostrarMensaje("mensajeConfiguracion", "Error al cargar configuración.", "error");
+      console.error(error);
+    }
+  }
+
+  async function guardarConfiguracion() {
+    const valores = {
+      nombre_tienda: document.getElementById("config_nombre_tienda").value.trim(),
+      whatsapp: document.getElementById("config_whatsapp").value.trim(),
+      correo: document.getElementById("config_correo").value.trim(),
+      instagram: document.getElementById("config_instagram").value.trim(),
+      facebook: document.getElementById("config_facebook").value.trim(),
+      tiktok: document.getElementById("config_tiktok").value.trim(),
+      mensaje_whatsapp: document.getElementById("config_mensaje_whatsapp").value.trim(),
+      slogan: document.getElementById("config_slogan").value.trim()
+    };
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          accion: "actualizarConfiguracion",
+          usuario: usuarioActivo || "admin",
+          valores
+        })
+      });
+
+      const json = await res.json();
+
+      if (!json.ok) {
+        mostrarMensaje("mensajeConfiguracion", json.mensaje || "No se pudo guardar configuración.", "error");
+        return;
+      }
+
+      mostrarMensaje("mensajeConfiguracion", "Configuración guardada correctamente.", "ok");
+
+    } catch (error) {
+      mostrarMensaje("mensajeConfiguracion", "Error al conectar con el servidor.", "error");
+      console.error(error);
+    }
+  }
+
+
+  async function cargarUsuariosAdmin() {
+    const tbody = document.getElementById("tablaUsuariosAdmin");
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="7">Cargando usuarios...</td></tr>';
+
+    try {
+      const res = await fetch(API_URL + "?accion=usuariosAdmin");
+      const json = await res.json();
+
+      if (!json.ok) {
+        tbody.innerHTML = '<tr><td colspan="7">No se pudieron cargar usuarios.</td></tr>';
+        mostrarMensaje("mensajeUsuarios", json.mensaje || "Error al cargar usuarios.", "error");
+        return;
+      }
+
+      usuariosAdminGlobal = json.data || [];
+      renderizarUsuariosAdmin(usuariosAdminGlobal);
+
+    } catch (error) {
+      tbody.innerHTML = '<tr><td colspan="7">Error al conectar con el servidor.</td></tr>';
+      mostrarMensaje("mensajeUsuarios", "Error al cargar usuarios.", "error");
+      console.error(error);
+    }
+  }
+
+  function renderizarUsuariosAdmin(usuarios) {
+    const tbody = document.getElementById("tablaUsuariosAdmin");
+    tbody.innerHTML = "";
+
+    if (!usuarios || usuarios.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7">No hay usuarios registrados.</td></tr>';
+      return;
+    }
+
+    usuarios.forEach(u => {
+      const estadoClase = String(u.estado || "").toLowerCase() === "activo" ? "estado-activo" : "estado-oculto";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${u.id_usuario || ''}</td>
+        <td><strong>${u.usuario || ''}</strong></td>
+        <td>${u.nombre || ''}</td>
+        <td><span class="rol-badge">${u.rol || ''}</span></td>
+        <td><span class="estado ${estadoClase}">${u.estado || ''}</span></td>
+        <td>${u.ultimo_acceso || ''}</td>
+        <td>
+          <button onclick="editarUsuarioAdmin('${u.id_usuario}')">Editar</button>
+          ${
+            String(u.estado || "").toLowerCase() === "activo"
+              ? `<button onclick="cambiarEstadoUsuarioAdmin('${u.id_usuario}', 'inactivo')" class="btn-secundario">Desactivar</button>`
+              : `<button onclick="cambiarEstadoUsuarioAdmin('${u.id_usuario}', 'activo')" class="btn-ok">Activar</button>`
+          }
+          <button onclick="cambiarClaveUsuarioAdmin('${u.id_usuario}')" class="btn-secundario">Cambiar clave</button>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function filtrarUsuariosPorEstado(estado, boton) {
+    filtroUsuariosActual = estado;
+
+    document.querySelectorAll("#seccionUsuarios .filtros-admin button").forEach(btn => {
+      btn.classList.remove("activo");
+    });
+
+    boton.classList.add("activo");
+    filtrarUsuariosAdmin();
+  }
+
+  function filtrarUsuariosAdmin() {
+    const texto = document.getElementById("buscarUsuarioAdmin").value.toLowerCase().trim();
+
+    const usuarios = usuariosAdminGlobal.filter(u => {
+      const coincideTexto =
+        !texto ||
+        String(u.usuario || "").toLowerCase().includes(texto) ||
+        String(u.nombre || "").toLowerCase().includes(texto) ||
+        String(u.rol || "").toLowerCase().includes(texto);
+
+      const coincideEstado =
+        filtroUsuariosActual === "todos" ||
+        String(u.estado || "").toLowerCase() === filtroUsuariosActual;
+
+      return coincideTexto && coincideEstado;
+    });
+
+    renderizarUsuariosAdmin(usuarios);
+  }
+
+  async function guardarUsuarioAdmin() {
+    const idUsuario = document.getElementById("usuario_id").value.trim();
+    const usuario = document.getElementById("usuario_usuario").value.trim();
+    const nombre = document.getElementById("usuario_nombre").value.trim();
+    const clave = document.getElementById("usuario_clave").value.trim();
+    const rol = document.getElementById("usuario_rol").value;
+    const estado = document.getElementById("usuario_estado").value;
+    const observacion = document.getElementById("usuario_observacion").value.trim();
+
+    if (!usuario || !nombre) {
+      mostrarMensaje("mensajeUsuarios", "Usuario y nombre son obligatorios.", "error");
+      return;
+    }
+
+    if (!idUsuario && !clave) {
+      mostrarMensaje("mensajeUsuarios", "La clave es obligatoria para crear un usuario.", "error");
+      return;
+    }
+
+    const accion = idUsuario ? "actualizarUsuario" : "guardarUsuario";
+
+    const data = {
+      accion,
+      usuario_log: usuarioActivo || "admin",
+      id_usuario: idUsuario,
+      usuario,
+      nombre,
+      clave,
+      rol,
+      estado,
+      observacion
+    };
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
+
+      const json = await res.json();
+
+      if (!json.ok) {
+        mostrarMensaje("mensajeUsuarios", json.mensaje || "No se pudo guardar usuario.", "error");
+        return;
+      }
+
+      mostrarMensaje("mensajeUsuarios", idUsuario ? "Cambios del usuario guardados correctamente." : "Usuario creado correctamente.", "ok");
+      limpiarFormularioUsuario();
+      await cargarUsuariosAdmin();
+
+    } catch (error) {
+      mostrarMensaje("mensajeUsuarios", "Error al conectar con el servidor.", "error");
+      console.error(error);
+    }
+  }
+
+  function editarUsuarioAdmin(idUsuario) {
+    const u = usuariosAdminGlobal.find(item => item.id_usuario === idUsuario);
+
+    if (!u) {
+      mostrarMensaje("mensajeUsuarios", "No se encontró el usuario.", "error");
+      return;
+    }
+
+    document.getElementById("usuario_id").value = u.id_usuario || "";
+    document.getElementById("usuario_usuario").value = u.usuario || "";
+    document.getElementById("usuario_nombre").value = u.nombre || "";
+    document.getElementById("usuario_clave").value = "";
+    document.getElementById("usuario_rol").value = u.rol || "operador";
+    document.getElementById("usuario_estado").value = u.estado || "activo";
+    document.getElementById("usuario_observacion").value = u.observacion || "";
+
+    document.getElementById("tituloFormularioUsuario").innerText = "Editando usuario: " + (u.usuario || "");
+    document.getElementById("btnGuardarUsuario").innerText = "Guardar Cambios";
+    document.getElementById("btnNuevoUsuario").innerText = "Cancelar Edición / Nuevo Usuario";
+    document.getElementById("modoUsuarioTexto").className = "modo-usuario-edicion";
+    document.getElementById("modoUsuarioTexto").innerText = "Modo edición: estás modificando un usuario existente.";
+
+    document.getElementById("seccionUsuarios").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function limpiarFormularioUsuario() {
+    document.getElementById("usuario_id").value = "";
+    document.getElementById("usuario_usuario").value = "";
+    document.getElementById("usuario_nombre").value = "";
+    document.getElementById("usuario_clave").value = "";
+    document.getElementById("usuario_rol").value = "operador";
+    document.getElementById("usuario_estado").value = "activo";
+    document.getElementById("usuario_observacion").value = "";
+
+    document.getElementById("tituloFormularioUsuario").innerText = "Nuevo Usuario";
+    document.getElementById("btnGuardarUsuario").innerText = "Crear Usuario";
+    document.getElementById("btnNuevoUsuario").innerText = "Limpiar Formulario";
+    document.getElementById("modoUsuarioTexto").className = "modo-usuario-creacion";
+    document.getElementById("modoUsuarioTexto").innerText = "Modo creación: estás creando un usuario nuevo.";
+  }
+
+  async function cambiarEstadoUsuarioAdmin(idUsuario, estado) {
+    const accionTexto = estado === "activo" ? "activar" : "desactivar";
+
+    if (!confirm("¿Seguro que desea " + accionTexto + " este usuario?")) return;
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          accion: "cambiarEstadoUsuario",
+          usuario_log: usuarioActivo || "admin",
+          id_usuario: idUsuario,
+          estado
+        })
+      });
+
+      const json = await res.json();
+
+      if (!json.ok) {
+        mostrarMensaje("mensajeUsuarios", json.mensaje || "No se pudo cambiar estado.", "error");
+        return;
+      }
+
+      mostrarMensaje("mensajeUsuarios", json.mensaje || "Estado actualizado.", "ok");
+      await cargarUsuariosAdmin();
+
+    } catch (error) {
+      mostrarMensaje("mensajeUsuarios", "Error al conectar con el servidor.", "error");
+      console.error(error);
+    }
+  }
+
+  async function cambiarClaveUsuarioAdmin(idUsuario) {
+    const nuevaClave = prompt("Ingrese la nueva clave para este usuario:");
+
+    if (!nuevaClave) return;
+
+    if (nuevaClave.length < 4) {
+      mostrarMensaje("mensajeUsuarios", "La clave debe tener mínimo 4 caracteres.", "error");
+      return;
+    }
+
+    try {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          accion: "cambiarClaveUsuario",
+          usuario_log: usuarioActivo || "admin",
+          id_usuario: idUsuario,
+          clave: nuevaClave
+        })
+      });
+
+      const json = await res.json();
+
+      if (!json.ok) {
+        mostrarMensaje("mensajeUsuarios", json.mensaje || "No se pudo cambiar clave.", "error");
+        return;
+      }
+
+      mostrarMensaje("mensajeUsuarios", "Clave actualizada correctamente.", "ok");
+
+    } catch (error) {
+      mostrarMensaje("mensajeUsuarios", "Error al conectar con el servidor.", "error");
+      console.error(error);
+    }
+  }
+
+
+  function convertirImagenDrive(url) {
+    if (!url) {
+      return "https://via.placeholder.com/500x650?text=Toque+Urbano";
+    }
+
+    let id = "";
+
+    if (url.includes("/file/d/")) {
+      id = url.split("/file/d/")[1].split("/")[0];
+    } else if (url.includes("id=")) {
+      id = url.split("id=")[1].split("&")[0];
+    }
+
+    if (id) {
+      return `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
+    }
+
+    return url;
+  }
+</script>
+
+</body>
+</html>

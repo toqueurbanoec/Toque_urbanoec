@@ -331,6 +331,16 @@
       gap: 16px;
     }
 
+    /* Campos de configuración protegidos: visibles, pero no editables */
+    input[readonly],
+    textarea[readonly],
+    .campo-bloqueado {
+      background: #eeeeee;
+      color: #666666;
+      cursor: not-allowed;
+      border-color: #bbbbbb;
+    }
+
     .papelera-resumen {
       background: #f7f7f7;
       border-left: 5px solid #8b0000;
@@ -1170,6 +1180,7 @@
   let filtroDestacadosActual = "todos";
   let usuariosAdminGlobal = [];
   let filtroUsuariosActual = "todos";
+  let configuracionProtegidaOriginal = { nombre_tienda: "", correo: "", slogan: "" };
   let catImagenBase64 = "";
   let catImagenNombre = "";
   let catImagenTipo = "";
@@ -2204,6 +2215,22 @@
     }
   }
 
+  function aplicarBloqueoConfiguracion() {
+    const camposProtegidos = [
+      "config_nombre_tienda",
+      "config_correo",
+      "config_slogan"
+    ];
+
+    camposProtegidos.forEach(id => {
+      const campo = document.getElementById(id);
+      if (!campo) return;
+      campo.setAttribute("readonly", "readonly");
+      campo.classList.add("campo-bloqueado");
+      campo.title = "Campo protegido para evitar cambios accidentales.";
+    });
+  }
+
   async function cargarConfiguracionAdmin() {
     try {
       const res = await fetch(API_URL + "?accion=configuracion");
@@ -2225,6 +2252,14 @@
       document.getElementById("config_mensaje_whatsapp").value = config.mensaje_whatsapp || "";
       document.getElementById("config_slogan").value = config.slogan || "";
 
+      configuracionProtegidaOriginal = {
+        nombre_tienda: config.nombre_tienda || "",
+        correo: config.correo || "",
+        slogan: config.slogan || ""
+      };
+
+      aplicarBloqueoConfiguracion();
+
       mostrarMensaje("mensajeConfiguracion", "Configuración cargada correctamente.", "ok");
 
     } catch (error) {
@@ -2234,15 +2269,19 @@
   }
 
   async function guardarConfiguracion() {
+    aplicarBloqueoConfiguracion();
+
     const valores = {
-      nombre_tienda: document.getElementById("config_nombre_tienda").value.trim(),
+      // Estos tres valores quedan protegidos. Aunque alguien intente modificarlos desde el navegador,
+      // al guardar se conserva lo último cargado desde la configuración real.
+      nombre_tienda: configuracionProtegidaOriginal.nombre_tienda || document.getElementById("config_nombre_tienda").value.trim(),
       whatsapp: document.getElementById("config_whatsapp").value.trim(),
-      correo: document.getElementById("config_correo").value.trim(),
+      correo: configuracionProtegidaOriginal.correo || document.getElementById("config_correo").value.trim(),
       instagram: document.getElementById("config_instagram").value.trim(),
       facebook: document.getElementById("config_facebook").value.trim(),
       tiktok: document.getElementById("config_tiktok").value.trim(),
       mensaje_whatsapp: document.getElementById("config_mensaje_whatsapp").value.trim(),
-      slogan: document.getElementById("config_slogan").value.trim()
+      slogan: configuracionProtegidaOriginal.slogan || document.getElementById("config_slogan").value.trim()
     };
 
     try {
@@ -2528,6 +2567,8 @@
     }
   }
 
+
+  document.addEventListener("DOMContentLoaded", aplicarBloqueoConfiguracion);
 
   function convertirImagenDrive(url) {
     if (!url) {

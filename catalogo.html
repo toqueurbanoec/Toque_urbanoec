@@ -90,6 +90,26 @@
       gap: 24px;
     }
 
+    .categoria-bloque {
+      margin-bottom: 3rem;
+    }
+
+    .categoria-titulo {
+      font-size: 1.35rem;
+      letter-spacing: 2px;
+      color: #111;
+      border-left: 5px solid #c9a227;
+      padding-left: 12px;
+      margin: 2rem 0 1.2rem;
+      text-transform: uppercase;
+    }
+
+    .categoria-productos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+
     .producto {
       position: relative;
       border: 1px solid #ddd;
@@ -292,6 +312,7 @@
   const API_URL = "https://script.google.com/macros/s/AKfycbyXbBGAybeZNJbMm61Q6GY9mybAb1Arni-Rjc5gf1LhgWb1wENkTMBrDDfy6Jqa5Jbd/exec";
 
   let productosGlobal = [];
+  let categoriasGlobal = [];
   let configuracion = {};
 
   async function cargarDatos() {
@@ -307,9 +328,10 @@
       const productosJson = await productosRes.json();
 
       productosGlobal = productosJson.data || [];
+      categoriasGlobal = categoriasJson.data || [];
 
-      cargarCategorias(categoriasJson.data || []);
-      mostrarProductos(productosGlobal);
+      cargarCategorias(categoriasGlobal);
+      mostrarProductosAgrupados(productosGlobal);
 
     } catch (error) {
       document.getElementById("mensaje").innerText = "No se pudo cargar el catálogo.";
@@ -393,6 +415,127 @@
     return `<p class="stock agotado">Agotado</p>`;
   }
 
+  function obtenerFechaProducto(producto) {
+    const fecha = producto.fecha_actualizacion || producto.fecha_creacion || "";
+    const tiempo = new Date(fecha).getTime();
+
+    if (!isNaN(tiempo)) {
+      return tiempo;
+    }
+
+    const idNumerico = String(producto.id_producto || "").replace(/\D/g, "");
+    return Number(idNumerico || 0);
+  }
+
+  function ordenarProductosRecientes(productos) {
+    return [...productos].sort((a, b) => obtenerFechaProducto(b) - obtenerFechaProducto(a));
+  }
+
+  function crearTarjetaProducto(producto) {
+    const variante = obtenerVariantePrincipal(producto);
+
+    const imagen = convertirImagenDrive(producto.imagen_principal_url || variante.imagen_url);
+    const descripcion = producto.descripcion || "Producto disponible en Toque Urbano.";
+    const categoria = producto.categoria || "General";
+    const nombre = producto.nombre || "Producto";
+    const color = variante.color || "";
+    const talla = variante.talla || "";
+    const destacado = String(producto.destacado || "").toLowerCase() === "si";
+    const stock = Number(variante.stock || 0);
+
+    const whatsapp = configuracion.whatsapp || "593988951244";
+    const mensajeBase = configuracion.mensaje_whatsapp || "Hola, vengo de la página web de Toque Urbano. Me interesa este producto:";
+    const textoWhatsapp = encodeURIComponent(`${mensajeBase} ${nombre}`);
+    const linkWhatsapp = `https://wa.me/${whatsapp}?text=${textoWhatsapp}`;
+
+    const card = document.createElement("div");
+    card.className = "producto";
+    card.innerHTML = `
+      ${destacado ? '<div class="etiqueta-destacado">DESTACADO</div>' : ''}
+
+      <div class="imagen-producto">
+        <img src="${imagen}" alt="${nombre}" loading="lazy">
+      </div>
+
+      <h3>${nombre}</h3>
+      <p class="categoria">${categoria}</p>
+      <p class="descripcion">${descripcion}</p>
+
+      <p class="detalle-producto"><strong>Color:</strong> ${color || '-'}</p>
+      <p class="detalle-producto"><strong>Talla:</strong> ${talla || '-'}</p>
+
+      ${obtenerPrecioHTML(variante)}
+      ${obtenerStockHTML(variante)}
+
+      <a href="${linkWhatsapp}" class="button ${stock <= 0 ? 'disabled' : ''}" target="_blank">
+        ${stock <= 0 ? 'Producto agotado' : 'Consultar por WhatsApp'}
+      </a>
+    `;
+
+    return card;
+  }
+
+  function mostrarProductosAgrupados(productos) {
+    const contenedor = document.getElementById("productos");
+    const mensaje = document.getElementById("mensaje");
+
+    contenedor.innerHTML = "";
+
+    if (!productos || productos.length === 0) {
+      mensaje.innerText = "Próximamente tendremos productos disponibles.";
+      return;
+    }
+
+    mensaje.innerText = "";
+    contenedor.style.display = "block";
+
+    const productosPorCategoria = {};
+
+    productos.forEach(producto => {
+      const categoria = producto.categoria || "General";
+
+      if (!productosPorCategoria[categoria]) {
+        productosPorCategoria[categoria] = [];
+      }
+
+      productosPorCategoria[categoria].push(producto);
+    });
+
+    const categoriasOrdenadas = [];
+
+    categoriasGlobal.forEach(cat => {
+      if (cat.nombre && productosPorCategoria[cat.nombre]) {
+        categoriasOrdenadas.push(cat.nombre);
+      }
+    });
+
+    Object.keys(productosPorCategoria).forEach(categoria => {
+      if (!categoriasOrdenadas.includes(categoria)) {
+        categoriasOrdenadas.push(categoria);
+      }
+    });
+
+    categoriasOrdenadas.forEach(categoria => {
+      const bloque = document.createElement("section");
+      bloque.className = "categoria-bloque";
+
+      const titulo = document.createElement("h3");
+      titulo.className = "categoria-titulo";
+      titulo.textContent = categoria;
+
+      const grid = document.createElement("div");
+      grid.className = "categoria-productos";
+
+      ordenarProductosRecientes(productosPorCategoria[categoria]).forEach(producto => {
+        grid.appendChild(crearTarjetaProducto(producto));
+      });
+
+      bloque.appendChild(titulo);
+      bloque.appendChild(grid);
+      contenedor.appendChild(bloque);
+    });
+  }
+
   function mostrarProductos(productos) {
     const contenedor = document.getElementById("productos");
     const mensaje = document.getElementById("mensaje");
@@ -405,49 +548,10 @@
     }
 
     mensaje.innerText = "";
+    contenedor.style.display = "grid";
 
-    productos.forEach(producto => {
-      const variante = obtenerVariantePrincipal(producto);
-
-      const imagen = convertirImagenDrive(producto.imagen_principal_url || variante.imagen_url);
-      const descripcion = producto.descripcion || "Producto disponible en Toque Urbano.";
-      const categoria = producto.categoria || "General";
-      const nombre = producto.nombre || "Producto";
-      const color = variante.color || "";
-      const talla = variante.talla || "";
-      const destacado = String(producto.destacado || "").toLowerCase() === "si";
-      const stock = Number(variante.stock || 0);
-
-      const whatsapp = configuracion.whatsapp || "593988951244";
-      const mensajeBase = configuracion.mensaje_whatsapp || "Hola, vengo de la página web de Toque Urbano. Me interesa este producto:";
-      const textoWhatsapp = encodeURIComponent(`${mensajeBase} ${nombre}`);
-      const linkWhatsapp = `https://wa.me/${whatsapp}?text=${textoWhatsapp}`;
-
-      const card = document.createElement("div");
-      card.className = "producto";
-      card.innerHTML = `
-        ${destacado ? '<div class="etiqueta-destacado">DESTACADO</div>' : ''}
-
-        <div class="imagen-producto">
-          <img src="${imagen}" alt="${nombre}" loading="lazy">
-        </div>
-
-        <h3>${nombre}</h3>
-        <p class="categoria">${categoria}</p>
-        <p class="descripcion">${descripcion}</p>
-
-        <p class="detalle-producto"><strong>Color:</strong> ${color || '-'}</p>
-        <p class="detalle-producto"><strong>Talla:</strong> ${talla || '-'}</p>
-
-        ${obtenerPrecioHTML(variante)}
-        ${obtenerStockHTML(variante)}
-
-        <a href="${linkWhatsapp}" class="button ${stock <= 0 ? 'disabled' : ''}" target="_blank">
-          ${stock <= 0 ? 'Producto agotado' : 'Consultar por WhatsApp'}
-        </a>
-      `;
-
-      contenedor.appendChild(card);
+    ordenarProductosRecientes(productos).forEach(producto => {
+      contenedor.appendChild(crearTarjetaProducto(producto));
     });
   }
 
@@ -456,7 +560,7 @@
     boton.classList.add("activo");
 
     if (categoria === "todos") {
-      mostrarProductos(productosGlobal);
+      mostrarProductosAgrupados(productosGlobal);
       return;
     }
 

@@ -431,8 +431,14 @@
 
   function cargarMarcas(productos) {
     const select = document.getElementById("filtroMarca");
+    if (!select) return;
+
+    const productosBase = categoriaSeleccionada === "todos"
+      ? (productos || [])
+      : (productos || []).filter(producto => String(producto.categoria || "") === categoriaSeleccionada);
+
     const marcas = [...new Set(
-      (productos || [])
+      productosBase
         .map(producto => String(producto.marca || "").trim())
         .filter(marca => marca)
     )].sort((a, b) => a.localeCompare(b, "es"));
@@ -445,6 +451,8 @@
       option.textContent = marca;
       select.appendChild(option);
     });
+
+    select.value = "todas";
   }
 
   function convertirImagenDrive(url) {
@@ -679,6 +687,7 @@
 
   function filtrarPorCategoria(categoria, boton) {
     categoriaSeleccionada = categoria;
+    marcaSeleccionada = "todas";
 
     document.querySelectorAll("#filtrosCategorias button").forEach(btn => {
       btn.classList.remove("activo");
@@ -688,6 +697,7 @@
       boton.classList.add("activo");
     }
 
+    cargarMarcas(productosGlobal);
     aplicarFiltros();
   }
 
@@ -709,11 +719,7 @@
       botonTodos.classList.add("activo");
     }
 
-    const selectMarca = document.getElementById("filtroMarca");
-    if (selectMarca) {
-      selectMarca.value = "todas";
-    }
-
+    cargarMarcas(productosGlobal);
     aplicarFiltros();
   }
 

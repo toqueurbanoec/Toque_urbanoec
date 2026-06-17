@@ -232,11 +232,12 @@
     }
 
     .detalles-producto {
+      width: min(100%, 235px);
       margin: 10px auto 0;
-      text-align: center;
+      text-align: left;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: stretch;
       gap: 4px;
     }
 
@@ -246,7 +247,15 @@
       margin: 0;
       line-height: 1.35;
       width: 100%;
-      text-align: center;
+      text-align: left;
+    }
+
+    .detalle-producto strong {
+      display: inline-block;
+      min-width: 54px;
+      margin-right: 4px;
+      text-align: right;
+      color: #222;
     }
 
     .precio {

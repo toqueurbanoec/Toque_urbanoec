@@ -218,18 +218,35 @@
       font-size: 0.85rem;
       color: #777;
       font-weight: bold;
+      margin: 4px 0 8px;
+      text-align: center;
     }
 
     .descripcion {
       font-size: 0.9rem;
       color: #444;
       min-height: 40px;
+      margin: 8px auto 10px;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .detalles-producto {
+      margin: 10px auto 0;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
     }
 
     .detalle-producto {
       font-size: 0.88rem;
       color: #333;
-      margin: 6px 0;
+      margin: 0;
+      line-height: 1.35;
+      width: 100%;
+      text-align: center;
     }
 
     .precio {
@@ -540,6 +557,7 @@
     const imagen = convertirImagenDrive(producto.imagen_principal_url || variante.imagen_url);
     const descripcion = producto.descripcion || "Producto disponible en Toque Urbano.";
     const categoria = producto.categoria || "General";
+    const marca = producto.marca || "Sin marca";
     const nombre = producto.nombre || "Producto";
     const color = variante.color || "";
     const talla = variante.talla || "";
@@ -566,8 +584,11 @@
       <p class="categoria">${categoria}</p>
       <p class="descripcion">${descripcion}</p>
 
-      <p class="detalle-producto"><strong>Color:</strong> ${color || '-'}</p>
-      <p class="detalle-producto"><strong>Talla:</strong> ${talla || '-'}</p>
+      <div class="detalles-producto">
+        <p class="detalle-producto"><strong>Marca:</strong> ${marca}</p>
+        <p class="detalle-producto"><strong>Color:</strong> ${color || '-'}</p>
+        <p class="detalle-producto"><strong>Talla:</strong> ${talla || '-'}</p>
+      </div>
 
       ${obtenerPrecioHTML(variante)}
       ${obtenerStockHTML(variante)}

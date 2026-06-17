@@ -88,6 +88,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 24px;
+      align-items: stretch;
     }
 
     .producto {
@@ -98,6 +99,9 @@
       text-align: center;
       background: #fff;
       box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
     }
 
     .etiqueta-destacado {
@@ -123,6 +127,7 @@
       justify-content: center;
       overflow: hidden;
       margin-bottom: 1rem;
+      flex-shrink: 0;
     }
 
     .imagen-producto img {
@@ -136,24 +141,36 @@
     .producto h3 {
       color: #c9a227;
       margin-bottom: 5px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .categoria {
       font-size: 0.85rem;
       color: #777;
       font-weight: bold;
+      min-height: 18px;
     }
 
     .descripcion {
       font-size: 0.9rem;
       color: #444;
-      min-height: 40px;
+      min-height: 58px;
+      max-height: 58px;
+      line-height: 1.35;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
     }
 
     .detalle-producto {
       font-size: 0.88rem;
       color: #333;
       margin: 6px 0;
+      min-height: 18px;
     }
 
     .precio {
@@ -161,6 +178,7 @@
       font-size: 1.2rem;
       color: #111;
       margin-top: 12px;
+      min-height: 28px;
     }
 
     .precio-normal {
@@ -180,6 +198,7 @@
       font-size: 0.85rem;
       font-weight: bold;
       margin-top: 8px;
+      min-height: 18px;
     }
 
     .disponible {
@@ -197,7 +216,7 @@
       padding: 11px 20px;
       border-radius: 6px;
       text-decoration: none;
-      margin-top: 10px;
+      margin-top: auto;
       font-weight: bold;
     }
 
@@ -431,8 +450,8 @@
         <p class="categoria">${categoria}</p>
         <p class="descripcion">${descripcion}</p>
 
-        ${color ? `<p class="detalle-producto"><strong>Color:</strong> ${color}</p>` : ''}
-        ${talla ? `<p class="detalle-producto"><strong>Talla:</strong> ${talla}</p>` : ''}
+        ${color ? `<p class="detalle-producto"><strong>Color:</strong> ${color}</p>` : '<p class="detalle-producto"></p>'}
+        ${talla ? `<p class="detalle-producto"><strong>Talla:</strong> ${talla}</p>` : '<p class="detalle-producto"></p>'}
 
         ${obtenerPrecioHTML(variante)}
         ${obtenerStockHTML(variante)}

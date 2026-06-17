@@ -136,6 +136,11 @@
     .producto h3 {
       color: #c9a227;
       margin-bottom: 5px;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .categoria {
@@ -431,8 +436,8 @@
         <p class="categoria">${categoria}</p>
         <p class="descripcion">${descripcion}</p>
 
-        ${color ? `<p class="detalle-producto"><strong>Color:</strong> ${color}</p>` : ''}
-        ${talla ? `<p class="detalle-producto"><strong>Talla:</strong> ${talla}</p>` : ''}
+        <p class="detalle-producto"><strong>Color:</strong> ${color || '-'}</p>
+        <p class="detalle-producto"><strong>Talla:</strong> ${talla || '-'}</p>
 
         ${obtenerPrecioHTML(variante)}
         ${obtenerStockHTML(variante)}
@@ -464,4 +469,3 @@
 
 </body>
 </html>
-

@@ -84,6 +84,57 @@
       color: #111;
     }
 
+    .filtros-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .filtro-grupo {
+      width: 100%;
+      max-width: 980px;
+    }
+
+    .filtro-label {
+      display: block;
+      font-weight: bold;
+      color: #111;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .filtro-botones {
+      text-align: center;
+    }
+
+    .filtro-select {
+      width: 100%;
+      max-width: 360px;
+      padding: 11px 14px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-weight: bold;
+      background: #fff;
+      color: #111;
+      outline: none;
+    }
+
+    .filtro-select:focus {
+      border-color: #c9a227;
+      box-shadow: 0 0 0 2px rgba(201,162,39,0.18);
+    }
+
+    .filtro-limpiar {
+      background: #555 !important;
+      color: #fff !important;
+    }
+
+    .filtro-limpiar:hover {
+      background: #c9a227 !important;
+      color: #111 !important;
+    }
+
     .productos {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -294,7 +345,23 @@
   <h2>Catálogo de Productos</h2>
 
   <div class="filtros" id="filtros">
-    <button class="activo" onclick="filtrarProductos('todos', this)">Todos</button>
+    <div class="filtros-panel">
+      <div class="filtro-grupo">
+        <span class="filtro-label">Filtrar por categoría</span>
+        <div class="filtro-botones" id="filtrosCategorias">
+          <button class="activo" data-categoria="todos" onclick="filtrarPorCategoria('todos', this)">Todos</button>
+        </div>
+      </div>
+
+      <div class="filtro-grupo">
+        <span class="filtro-label">Filtrar por marca</span>
+        <select id="filtroMarca" class="filtro-select" onchange="filtrarPorMarca(this.value)">
+          <option value="todas">Todas las marcas</option>
+        </select>
+      </div>
+
+      <button class="filtro-limpiar" onclick="limpiarFiltros()">Limpiar filtros</button>
+    </div>
   </div>
 
   <div class="productos" id="productos"></div>
@@ -314,6 +381,8 @@
   let productosGlobal = [];
   let categoriasGlobal = [];
   let configuracion = {};
+  let categoriaSeleccionada = "todos";
+  let marcaSeleccionada = "todas";
 
   async function cargarDatos() {
     try {
@@ -331,7 +400,8 @@
       categoriasGlobal = categoriasJson.data || [];
 
       cargarCategorias(categoriasGlobal);
-      mostrarProductosAgrupados(productosGlobal);
+      cargarMarcas(productosGlobal);
+      aplicarFiltros();
 
     } catch (error) {
       document.getElementById("mensaje").innerText = "No se pudo cargar el catálogo.";
@@ -340,15 +410,40 @@
   }
 
   function cargarCategorias(categorias) {
-    const contenedor = document.getElementById("filtros");
+    const contenedor = document.getElementById("filtrosCategorias");
+
+    contenedor.innerHTML = `
+      <button class="activo" data-categoria="todos" onclick="filtrarPorCategoria('todos', this)">Todos</button>
+    `;
 
     categorias.forEach(cat => {
+      if (!cat.nombre) return;
+
       const btn = document.createElement("button");
       btn.textContent = cat.nombre;
+      btn.setAttribute("data-categoria", cat.nombre);
       btn.onclick = function() {
-        filtrarProductos(cat.nombre, btn);
+        filtrarPorCategoria(cat.nombre, btn);
       };
       contenedor.appendChild(btn);
+    });
+  }
+
+  function cargarMarcas(productos) {
+    const select = document.getElementById("filtroMarca");
+    const marcas = [...new Set(
+      (productos || [])
+        .map(producto => String(producto.marca || "").trim())
+        .filter(marca => marca)
+    )].sort((a, b) => a.localeCompare(b, "es"));
+
+    select.innerHTML = '<option value="todas">Todas las marcas</option>';
+
+    marcas.forEach(marca => {
+      const option = document.createElement("option");
+      option.value = marca;
+      option.textContent = marca;
+      select.appendChild(option);
     });
   }
 
@@ -443,6 +538,8 @@
     const destacado = String(producto.destacado || "").toLowerCase() === "si";
     const stock = Number(variante.stock || 0);
 
+    // WhatsApp se mantiene conectado a configuracion/base de datos.
+    // No se cambia el número aquí: se lee desde configuracion.whatsapp.
     const whatsapp = configuracion.whatsapp || "593988951244";
     const mensajeBase = configuracion.mensaje_whatsapp || "Hola, vengo de la página web de Toque Urbano. Me interesa este producto:";
     const textoWhatsapp = encodeURIComponent(`${mensajeBase} ${nombre}`);
@@ -482,7 +579,7 @@
     contenedor.innerHTML = "";
 
     if (!productos || productos.length === 0) {
-      mensaje.innerText = "Próximamente tendremos productos disponibles.";
+      mensaje.innerText = "No hay productos disponibles con estos filtros.";
       return;
     }
 
@@ -543,7 +640,7 @@
     contenedor.innerHTML = "";
 
     if (!productos || productos.length === 0) {
-      mensaje.innerText = "Próximamente tendremos productos disponibles.";
+      mensaje.innerText = "No hay productos disponibles con estos filtros.";
       return;
     }
 
@@ -555,17 +652,69 @@
     });
   }
 
-  function filtrarProductos(categoria, boton) {
-    document.querySelectorAll(".filtros button").forEach(btn => btn.classList.remove("activo"));
-    boton.classList.add("activo");
+  function obtenerProductosFiltrados() {
+    return productosGlobal.filter(producto => {
+      const coincideCategoria =
+        categoriaSeleccionada === "todos" ||
+        String(producto.categoria || "") === categoriaSeleccionada;
 
-    if (categoria === "todos") {
-      mostrarProductosAgrupados(productosGlobal);
+      const coincideMarca =
+        marcaSeleccionada === "todas" ||
+        String(producto.marca || "") === marcaSeleccionada;
+
+      return coincideCategoria && coincideMarca;
+    });
+  }
+
+  function aplicarFiltros() {
+    const filtrados = obtenerProductosFiltrados();
+
+    if (categoriaSeleccionada === "todos") {
+      mostrarProductosAgrupados(filtrados);
       return;
     }
 
-    const filtrados = productosGlobal.filter(p => p.categoria === categoria);
     mostrarProductos(filtrados);
+  }
+
+  function filtrarPorCategoria(categoria, boton) {
+    categoriaSeleccionada = categoria;
+
+    document.querySelectorAll("#filtrosCategorias button").forEach(btn => {
+      btn.classList.remove("activo");
+    });
+
+    if (boton) {
+      boton.classList.add("activo");
+    }
+
+    aplicarFiltros();
+  }
+
+  function filtrarPorMarca(marca) {
+    marcaSeleccionada = marca || "todas";
+    aplicarFiltros();
+  }
+
+  function limpiarFiltros() {
+    categoriaSeleccionada = "todos";
+    marcaSeleccionada = "todas";
+
+    const botonTodos = document.querySelector('#filtrosCategorias button[data-categoria="todos"]');
+    document.querySelectorAll("#filtrosCategorias button").forEach(btn => {
+      btn.classList.remove("activo");
+    });
+
+    if (botonTodos) {
+      botonTodos.classList.add("activo");
+    }
+
+    const selectMarca = document.getElementById("filtroMarca");
+    if (selectMarca) {
+      selectMarca.value = "todas";
+    }
+
+    aplicarFiltros();
   }
 
   cargarDatos();

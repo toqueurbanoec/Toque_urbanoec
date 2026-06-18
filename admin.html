@@ -241,6 +241,50 @@
       margin-bottom: 1rem;
     }
 
+    /* ===== AJUSTE PREMIUM ADMIN - TABLAS Y BOTONES ===== */
+    @media (min-width: 769px) {
+      .tabs button {
+        padding: 10px 14px;
+        font-size: 0.9rem;
+        margin: 4px;
+        border-radius: 7px;
+      }
+
+      #seccionProductos table {
+        min-width: 980px;
+      }
+
+      #seccionProductos th,
+      #seccionProductos td {
+        padding: 8px 9px;
+        font-size: 0.86rem;
+      }
+
+      #seccionProductos th:nth-child(3),
+      #seccionProductos td:nth-child(3) {
+        width: 115px;
+        max-width: 130px;
+      }
+
+      #seccionProductos td:nth-child(3) {
+        font-weight: 600;
+        color: #333;
+        word-break: break-word;
+      }
+
+      #seccionProductos td:last-child {
+        min-width: 235px;
+      }
+
+      #seccionProductos td button {
+        padding: 6px 9px;
+        font-size: 0.76rem;
+        margin: 2px;
+        border-radius: 5px;
+      }
+    }
+
+
 
     .modo-creacion {
       background: #e9f7ef;
@@ -329,16 +373,6 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 16px;
-    }
-
-    /* Campos de configuración protegidos: visibles, pero no editables */
-    input[readonly],
-    textarea[readonly],
-    .campo-bloqueado {
-      background: #eeeeee;
-      color: #666666;
-      cursor: not-allowed;
-      border-color: #bbbbbb;
     }
 
     .papelera-resumen {
@@ -806,6 +840,7 @@
             <tr>
               <th>Imagen</th>
               <th>Producto</th>
+              <th>Marca</th>
               <th>Categoría</th>
               <th>Precio</th>
               <th>Stock</th>
@@ -816,7 +851,7 @@
           </thead>
           <tbody id="tablaProductos">
             <tr>
-              <td colspan="8">Cargando productos...</td>
+              <td colspan="9">Cargando productos...</td>
             </tr>
           </tbody>
         </table>
@@ -1180,7 +1215,6 @@
   let filtroDestacadosActual = "todos";
   let usuariosAdminGlobal = [];
   let filtroUsuariosActual = "todos";
-  let configuracionProtegidaOriginal = { nombre_tienda: "", correo: "", slogan: "" };
   let catImagenBase64 = "";
   let catImagenNombre = "";
   let catImagenTipo = "";
@@ -1277,14 +1311,14 @@
 
   async function cargarProductosAdmin() {
     const tbody = document.getElementById("tablaProductos");
-    tbody.innerHTML = '<tr><td colspan="8">Cargando productos...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9">Cargando productos...</td></tr>';
 
     try {
       const res = await fetch(API_URL + "?accion=productosAdmin");
       const json = await res.json();
 
       if (!json.ok) {
-        tbody.innerHTML = '<tr><td colspan="8">No se pudo cargar productos.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9">No se pudo cargar productos.</td></tr>';
         mostrarMensaje("mensajeProductos", json.mensaje || "Error al cargar productos.", "error");
         return;
       }
@@ -1293,7 +1327,7 @@
       aplicarFiltrosProductos();
 
     } catch (error) {
-      tbody.innerHTML = '<tr><td colspan="8">Error de conexión.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9">Error de conexión.</td></tr>';
       mostrarMensaje("mensajeProductos", "Error al conectar con el servidor.", "error");
       console.error(error);
     }
@@ -1304,7 +1338,7 @@
     tbody.innerHTML = "";
 
     if (!productos || productos.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8">No hay productos registrados.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9">No hay productos registrados.</td></tr>';
       return;
     }
 
@@ -1321,6 +1355,7 @@
           <strong>${producto.nombre || ''}</strong><br>
           <small>${producto.codigo_producto || ''}</small>
         </td>
+        <td>${producto.marca || ''}</td>
         <td>${producto.categoria || ''}</td>
         <td>${precio}</td>
         <td>${stock}</td>
@@ -1367,6 +1402,7 @@
       const coincideTexto =
         !texto ||
         String(p.nombre || "").toLowerCase().includes(texto) ||
+        String(p.marca || "").toLowerCase().includes(texto) ||
         String(p.categoria || "").toLowerCase().includes(texto) ||
         String(p.codigo_producto || "").toLowerCase().includes(texto) ||
         String(p.estado || "").toLowerCase().includes(texto);
@@ -2215,22 +2251,6 @@
     }
   }
 
-  function aplicarBloqueoConfiguracion() {
-    const camposProtegidos = [
-      "config_nombre_tienda",
-      "config_correo",
-      "config_slogan"
-    ];
-
-    camposProtegidos.forEach(id => {
-      const campo = document.getElementById(id);
-      if (!campo) return;
-      campo.setAttribute("readonly", "readonly");
-      campo.classList.add("campo-bloqueado");
-      campo.title = "Campo protegido para evitar cambios accidentales.";
-    });
-  }
-
   async function cargarConfiguracionAdmin() {
     try {
       const res = await fetch(API_URL + "?accion=configuracion");
@@ -2252,14 +2272,6 @@
       document.getElementById("config_mensaje_whatsapp").value = config.mensaje_whatsapp || "";
       document.getElementById("config_slogan").value = config.slogan || "";
 
-      configuracionProtegidaOriginal = {
-        nombre_tienda: config.nombre_tienda || "",
-        correo: config.correo || "",
-        slogan: config.slogan || ""
-      };
-
-      aplicarBloqueoConfiguracion();
-
       mostrarMensaje("mensajeConfiguracion", "Configuración cargada correctamente.", "ok");
 
     } catch (error) {
@@ -2269,19 +2281,15 @@
   }
 
   async function guardarConfiguracion() {
-    aplicarBloqueoConfiguracion();
-
     const valores = {
-      // Estos tres valores quedan protegidos. Aunque alguien intente modificarlos desde el navegador,
-      // al guardar se conserva lo último cargado desde la configuración real.
-      nombre_tienda: configuracionProtegidaOriginal.nombre_tienda || document.getElementById("config_nombre_tienda").value.trim(),
+      nombre_tienda: document.getElementById("config_nombre_tienda").value.trim(),
       whatsapp: document.getElementById("config_whatsapp").value.trim(),
-      correo: configuracionProtegidaOriginal.correo || document.getElementById("config_correo").value.trim(),
+      correo: document.getElementById("config_correo").value.trim(),
       instagram: document.getElementById("config_instagram").value.trim(),
       facebook: document.getElementById("config_facebook").value.trim(),
       tiktok: document.getElementById("config_tiktok").value.trim(),
       mensaje_whatsapp: document.getElementById("config_mensaje_whatsapp").value.trim(),
-      slogan: configuracionProtegidaOriginal.slogan || document.getElementById("config_slogan").value.trim()
+      slogan: document.getElementById("config_slogan").value.trim()
     };
 
     try {
@@ -2567,8 +2575,6 @@
     }
   }
 
-
-  document.addEventListener("DOMContentLoaded", aplicarBloqueoConfiguracion);
 
   function convertirImagenDrive(url) {
     if (!url) {

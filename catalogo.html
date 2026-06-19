@@ -1,118 +1,964 @@
-from pathlib import Path
-import re
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo - Toque Urbano</title>
 
-src = Path("/mnt/data/Pegado text.txt")
-text = src.read_text(encoding="utf-8")
+  <link rel="icon" type="image/png" href="favicon.png">
 
-# 1) Add cache constants after existing state variables
-old_vars = """  let productosGlobal = [];
-  let categoriasGlobal = [];
-  let configuracion = {};
-  let categoriaSeleccionada = "todos";
-  let marcaSeleccionada = "todas";"""
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #ffffff;
+      color: #222;
+    }
 
-new_vars = """  let productosGlobal = [];
+    header {
+      text-align: center;
+      padding: 2rem 1rem 1rem;
+    }
+
+    .logo-text {
+      font-size: 2.2rem;
+      letter-spacing: 7px;
+      font-weight: bold;
+      margin: 0;
+      color: #111;
+    }
+
+    .logo-sub {
+      font-size: 0.9rem;
+      letter-spacing: 4px;
+      color: #555;
+      margin-top: 5px;
+    }
+
+    nav {
+      background: #111;
+      text-align: center;
+      padding: 12px 0;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+    }
+
+    nav a:hover {
+      color: #c9a227;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 2rem;
+    }
+
+    h2 {
+      text-align: center;
+      border-bottom: 2px solid #c9a227;
+      padding-bottom: 8px;
+    }
+
+    .filtros {
+      text-align: center;
+      margin: 2rem 0;
+    }
+
+    .filtros button {
+      background: #111;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      margin: 5px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .filtros button:hover,
+    .filtros button.activo {
+      background: #c9a227;
+      color: #111;
+    }
+
+    .filtros-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .filtro-grupo {
+      width: 100%;
+      max-width: 980px;
+    }
+
+    .filtro-label {
+      display: block;
+      font-weight: bold;
+      color: #111;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .filtro-botones {
+      text-align: center;
+    }
+
+    .filtro-select {
+      width: 100%;
+      max-width: 360px;
+      padding: 11px 14px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-weight: bold;
+      background: #fff;
+      color: #111;
+      outline: none;
+    }
+
+    .filtro-select:focus {
+      border-color: #c9a227;
+      box-shadow: 0 0 0 2px rgba(201,162,39,0.18);
+    }
+
+    .marca-dropdown {
+      position: relative;
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto;
+      text-align: left;
+    }
+
+    .marca-trigger {
+      width: 100%;
+      background: #111;
+      color: #fff;
+      border: 1px solid #c9a227;
+      padding: 11px 14px;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      letter-spacing: 0.3px;
+    }
+
+    .marca-trigger:hover {
+      background: #1a1a1a;
+      color: #c9a227;
+    }
+
+    .marca-panel {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: #fff;
+      border: 1px solid #c9a227;
+      border-radius: 14px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+      z-index: 50;
+      overflow: hidden;
+    }
+
+    .marca-panel.abierto {
+      display: block;
+    }
+
+    .marca-panel-head {
+      background: #111;
+      color: #fff;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .marca-panel-head strong {
+      font-size: 0.78rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #c9a227;
+    }
+
+    .marca-cerrar {
+      background: transparent;
+      border: 1px solid rgba(201,162,39,0.65);
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .marca-cerrar:hover {
+      background: #c9a227;
+      color: #111;
+    }
+
+    .marca-opciones {
+      max-height: 285px;
+      overflow-y: auto;
+      padding: 6px;
+      background: #fff;
+    }
+
+    .marca-opcion {
+      width: 100%;
+      border: none;
+      background: #fff;
+      color: #222;
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.92rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 2px 0;
+    }
+
+    .marca-opcion:hover,
+    .marca-opcion.activa {
+      background: #111;
+      color: #c9a227;
+    }
+
+    .marca-opcion .check {
+      font-size: 0.85rem;
+      color: #c9a227;
+      margin-left: 8px;
+    }
+
+    .filtro-limpiar {
+      background: #555 !important;
+      color: #fff !important;
+    }
+
+    .filtro-limpiar:hover {
+      background: #c9a227 !important;
+      color: #111 !important;
+    }
+
+    .productos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+
+    .categoria-bloque {
+      margin-bottom: 3rem;
+    }
+
+    .categoria-titulo {
+      font-size: 1.35rem;
+      letter-spacing: 2px;
+      color: #111;
+      border-left: 5px solid #c9a227;
+      padding-left: 12px;
+      margin: 2rem 0 1.2rem;
+      text-transform: uppercase;
+    }
+
+    .categoria-productos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+
+    .producto {
+      position: relative;
+      border: 1px solid #ddd;
+      border-radius: 14px;
+      padding: 1rem;
+      text-align: center;
+      background: #fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .etiqueta-destacado {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: #c9a227;
+      color: #111;
+      padding: 6px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      z-index: 2;
+    }
+
+    .imagen-producto {
+      width: 100%;
+      height: 330px;
+      background: #f4f4f4;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .imagen-producto img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      display: block;
+    }
+
+    .producto h3 {
+      color: #c9a227;
+      margin-bottom: 5px;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .categoria {
+      font-size: 0.85rem;
+      color: #777;
+      font-weight: bold;
+      margin: 4px 0 8px;
+      text-align: center;
+    }
+
+    .descripcion {
+      font-size: 0.9rem;
+      color: #444;
+      min-height: 40px;
+      margin: 8px auto 10px;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .detalles-producto {
+      width: min(100%, 235px);
+      margin: 10px auto 0;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+    }
+
+    .detalle-producto {
+      font-size: 0.88rem;
+      color: #333;
+      margin: 0;
+      line-height: 1.35;
+      width: 100%;
+      text-align: left;
+    }
+
+    .detalle-producto strong {
+      display: inline-block;
+      min-width: 54px;
+      margin-right: 4px;
+      text-align: right;
+      color: #222;
+    }
+
+    .precio {
+      font-weight: bold;
+      font-size: 1.2rem;
+      color: #111;
+      margin-top: 12px;
+    }
+
+    .precio-normal {
+      color: #888;
+      text-decoration: line-through;
+      font-size: 0.95rem;
+      margin-right: 6px;
+    }
+
+    .precio-oferta {
+      color: #c9a227;
+      font-weight: bold;
+      font-size: 1.25rem;
+    }
+
+    .stock {
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    .disponible {
+      color: #1b7f3a;
+    }
+
+    .agotado {
+      color: #b00020;
+    }
+
+    .button {
+      display: inline-block;
+      background: #111;
+      color: white;
+      padding: 11px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .button:hover {
+      background: #c9a227;
+      color: #111;
+    }
+
+    .button.disabled {
+      background: #999;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    .mensaje {
+      text-align: center;
+      padding: 2rem;
+      color: #555;
+    }
+
+    footer {
+      background: #111;
+      color: white;
+      text-align: center;
+      padding: 2rem 1rem;
+      margin-top: 3rem;
+    }
+
+    footer h4 {
+      color: #c9a227;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        padding: 1rem;
+      }
+
+      .logo-text {
+        font-size: 1.8rem;
+        letter-spacing: 5px;
+      }
+
+      nav a {
+        margin: 0 8px;
+        font-size: 0.9rem;
+      }
+
+      .imagen-producto {
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1 class="logo-text">TOQUE URBANO</h1>
+  <div class="logo-sub">BOUTIQUE</div>
+</header>
+
+<nav>
+  <a href="index.html">Inicio</a>
+  <a href="catalogo.html">Catálogo</a>
+  <a href="index.html#contacto">Contacto</a>
+</nav>
+
+<main>
+  <h2>Catálogo de Productos</h2>
+
+  <div class="filtros" id="filtros">
+    <div class="filtros-panel">
+      <div class="filtro-grupo">
+        <span class="filtro-label">Filtrar por categoría</span>
+        <div class="filtro-botones" id="filtrosCategorias">
+          <button class="activo" data-categoria="todos" onclick="filtrarPorCategoria('todos', this)">Todos</button>
+        </div>
+      </div>
+
+      <div class="filtro-grupo">
+        <span class="filtro-label">Filtrar por marca</span>
+        <div class="marca-dropdown" id="marcaDropdown">
+          <button type="button" class="marca-trigger" id="marcaTrigger" onclick="toggleMarcaPanel()">
+            <span id="marcaTexto">Todas las marcas</span>
+            <span>▾</span>
+          </button>
+
+          <div class="marca-panel" id="marcaPanel">
+            <div class="marca-panel-head">
+              <strong>Seleccionar marca</strong>
+              <button type="button" class="marca-cerrar" onclick="cerrarMarcaPanel()">← Volver al catálogo</button>
+            </div>
+
+            <div class="marca-opciones" id="marcaOpciones">
+              <button type="button" class="marca-opcion activa" data-marca="todas" onclick="seleccionarMarca('todas', 'Todas las marcas')">
+                Todas las marcas <span class="check">✓</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="filtro-limpiar" onclick="limpiarFiltros()">Limpiar filtros</button>
+    </div>
+  </div>
+
+  <div class="productos" id="productos"></div>
+
+  <div class="mensaje" id="mensaje">Cargando catálogo...</div>
+</main>
+
+<footer>
+  <h4>Toque Urbano Boutique</h4>
+  <p>Moda urbana, moderna y elegante.</p>
+  <p>&copy; 2026 Toque Urbano. Todos los derechos reservados.</p>
+</footer>
+
+<script>
+  const API_URL = "https://script.google.com/macros/s/AKfycbyXbBGAybeZNJbMm61Q6GY9mybAb1Arni-Rjc5gf1LhgWb1wENkTMBrDDfy6Jqa5Jbd/exec";
+
+  let productosGlobal = [];
   let categoriasGlobal = [];
   let configuracion = {};
   let categoriaSeleccionada = "todos";
   let marcaSeleccionada = "todas";
 
-  const CACHE_CATALOGO_KEY = "toque_urbano_catalogo_cache_v1";
-  const CACHE_CATALOGO_MINUTOS = 10;"""
-
-if old_vars not in text:
-    raise RuntimeError("No se encontró el bloque de variables.")
-text = text.replace(old_vars, new_vars, 1)
-
-# 2) Replace cargarDatos with cache + parallel requests
-pattern = r"""  async function cargarDatos\(\) \{.*?  \}
-
-  function cargarCategorias"""
-new_cargar = """  function leerCacheCatalogo() {
-    try {
-      const cacheTexto = localStorage.getItem(CACHE_CATALOGO_KEY);
-      if (!cacheTexto) return null;
-
-      const cache = JSON.parse(cacheTexto);
-      const tiempoCache = Number(cache.tiempo || 0);
-      const minutosTranscurridos = (Date.now() - tiempoCache) / 60000;
-
-      if (minutosTranscurridos > CACHE_CATALOGO_MINUTOS) {
-        return null;
-      }
-
-      return cache;
-    } catch (error) {
-      return null;
-    }
-  }
-
-  function guardarCacheCatalogo() {
-    try {
-      localStorage.setItem(CACHE_CATALOGO_KEY, JSON.stringify({
-        tiempo: Date.now(),
-        configuracion,
-        categorias: categoriasGlobal,
-        productos: productosGlobal
-      }));
-    } catch (error) {
-      console.warn("No se pudo guardar caché del catálogo:", error);
-    }
-  }
-
-  function pintarCatalogo() {
-    cargarCategorias(categoriasGlobal);
-    cargarMarcas(productosGlobal);
-    aplicarFiltros();
-  }
-
   async function cargarDatos() {
-    const cache = leerCacheCatalogo();
-
-    if (cache) {
-      configuracion = cache.configuracion || {};
-      categoriasGlobal = cache.categorias || [];
-      productosGlobal = cache.productos || [];
-      pintarCatalogo();
-    }
-
     try {
-      const [configRes, categoriasRes, productosRes] = await Promise.all([
-        fetch(API_URL + "?accion=configuracion"),
-        fetch(API_URL + "?accion=categorias"),
-        fetch(API_URL + "?accion=productos")
-      ]);
-
-      const [configJson, categoriasJson, productosJson] = await Promise.all([
-        configRes.json(),
-        categoriasRes.json(),
-        productosRes.json()
-      ]);
-
+      const configRes = await fetch(API_URL + "?accion=configuracion");
+      const configJson = await configRes.json();
       configuracion = configJson.data || {};
-      categoriasGlobal = categoriasJson.data || [];
-      productosGlobal = productosJson.data || [];
 
-      guardarCacheCatalogo();
-      pintarCatalogo();
+      const categoriasRes = await fetch(API_URL + "?accion=categorias");
+      const categoriasJson = await categoriasRes.json();
+
+      const productosRes = await fetch(API_URL + "?accion=productos");
+      const productosJson = await productosRes.json();
+
+      productosGlobal = productosJson.data || [];
+      categoriasGlobal = categoriasJson.data || [];
+
+      cargarCategorias(categoriasGlobal);
+      cargarMarcas(productosGlobal);
+      aplicarFiltros();
 
     } catch (error) {
-      if (!cache) {
-        document.getElementById("mensaje").innerText = "No se pudo cargar el catálogo.";
-      }
+      document.getElementById("mensaje").innerText = "No se pudo cargar el catálogo.";
       console.error(error);
     }
   }
 
-  function cargarCategorias"""
-text, n = re.subn(pattern, new_cargar, text, count=1, flags=re.S)
-if n != 1:
-    raise RuntimeError("No se pudo reemplazar cargarDatos.")
+  function cargarCategorias(categorias) {
+    const contenedor = document.getElementById("filtrosCategorias");
 
-# Ensure w700 remains
-text = text.replace("&sz=w1000", "&sz=w700")
+    contenedor.innerHTML = `
+      <button class="activo" data-categoria="todos" onclick="filtrarPorCategoria('todos', this)">Todos</button>
+    `;
 
-out = Path("/mnt/data/catalogo_cache_carga_rapida.html")
-out.write_text(text, encoding="utf-8")
+    categorias.forEach(cat => {
+      if (!cat.nombre) return;
 
-print(str(out))
+      const btn = document.createElement("button");
+      btn.textContent = cat.nombre;
+      btn.setAttribute("data-categoria", cat.nombre);
+      btn.onclick = function() {
+        filtrarPorCategoria(cat.nombre, btn);
+      };
+      contenedor.appendChild(btn);
+    });
+  }
+
+  function cargarMarcas(productos) {
+    const contenedor = document.getElementById("marcaOpciones");
+    const textoMarca = document.getElementById("marcaTexto");
+    if (!contenedor) return;
+
+    const productosBase = categoriaSeleccionada === "todos"
+      ? (productos || [])
+      : (productos || []).filter(producto => String(producto.categoria || "") === categoriaSeleccionada);
+
+    const marcas = [...new Set(
+      productosBase
+        .map(producto => String(producto.marca || "").trim())
+        .filter(marca => marca)
+    )].sort((a, b) => a.localeCompare(b, "es"));
+
+    contenedor.innerHTML = "";
+
+    const btnTodas = document.createElement("button");
+    btnTodas.type = "button";
+    btnTodas.className = "marca-opcion activa";
+    btnTodas.setAttribute("data-marca", "todas");
+    btnTodas.onclick = function() {
+      seleccionarMarca("todas", "Todas las marcas");
+    };
+    btnTodas.innerHTML = 'Todas las marcas <span class="check">✓</span>';
+    contenedor.appendChild(btnTodas);
+
+    marcas.forEach(marca => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "marca-opcion";
+      btn.setAttribute("data-marca", marca);
+      btn.onclick = function() {
+        seleccionarMarca(marca, marca);
+      };
+      btn.textContent = marca;
+      contenedor.appendChild(btn);
+    });
+
+    marcaSeleccionada = "todas";
+    if (textoMarca) {
+      textoMarca.textContent = "Todas las marcas";
+    }
+
+    cerrarMarcaPanel();
+  }
+
+  function toggleMarcaPanel() {
+    const panel = document.getElementById("marcaPanel");
+    if (!panel) return;
+    panel.classList.toggle("abierto");
+  }
+
+  function cerrarMarcaPanel() {
+    const panel = document.getElementById("marcaPanel");
+    if (!panel) return;
+    panel.classList.remove("abierto");
+  }
+
+  function seleccionarMarca(valor, texto) {
+    marcaSeleccionada = valor || "todas";
+
+    const textoMarca = document.getElementById("marcaTexto");
+    if (textoMarca) {
+      textoMarca.textContent = texto || "Todas las marcas";
+    }
+
+    document.querySelectorAll(".marca-opcion").forEach(btn => {
+      btn.classList.remove("activa");
+      const check = btn.querySelector(".check");
+      if (check) check.remove();
+    });
+
+    const opciones = document.querySelectorAll(".marca-opcion");
+    opciones.forEach(btn => {
+      if (btn.getAttribute("data-marca") === marcaSeleccionada) {
+        btn.classList.add("activa");
+        if (!btn.querySelector(".check")) {
+          btn.insertAdjacentHTML("beforeend", ' <span class="check">✓</span>');
+        }
+      }
+    });
+
+    cerrarMarcaPanel();
+    aplicarFiltros();
+  }
+
+  document.addEventListener("click", function(event) {
+    const dropdown = document.getElementById("marcaDropdown");
+    const panel = document.getElementById("marcaPanel");
+
+    if (!dropdown || !panel) return;
+
+    if (!dropdown.contains(event.target)) {
+      panel.classList.remove("abierto");
+    }
+  });
+
+  function convertirImagenDrive(url) {
+    if (!url) {
+      return "https://via.placeholder.com/500x650?text=Toque+Urbano";
+    }
+
+    let id = "";
+
+    if (url.includes("/file/d/")) {
+      id = url.split("/file/d/")[1].split("/")[0];
+    } else if (url.includes("id=")) {
+      id = url.split("id=")[1].split("&")[0];
+    }
+
+    if (id) {
+      return `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
+    }
+
+    return url;
+  }
+
+  function obtenerVariantePrincipal(producto) {
+    if (producto.variantes && producto.variantes.length > 0) {
+      return producto.variantes[0];
+    }
+
+    return {};
+  }
+
+  function formatoPrecio(valor) {
+    if (valor === undefined || valor === null || valor === "") return "";
+    return "$" + Number(valor).toFixed(2);
+  }
+
+  function obtenerPrecioHTML(variante) {
+    const precio = variante.precio;
+    const precioOferta = variante.precio_oferta;
+
+    if (precioOferta && Number(precioOferta) > 0) {
+      return `
+        <p class="precio">
+          <span class="precio-normal">${formatoPrecio(precio)}</span>
+          <span class="precio-oferta">${formatoPrecio(precioOferta)}</span>
+        </p>
+      `;
+    }
+
+    if (precio && Number(precio) > 0) {
+      return `<p class="precio">${formatoPrecio(precio)}</p>`;
+    }
+
+    return `<p class="precio">Consultar precio</p>`;
+  }
+
+  function obtenerStockHTML(variante) {
+    const stock = Number(variante.stock || 0);
+
+    if (stock > 0) {
+      return `<p class="stock disponible">Disponible: ${stock} unidad(es)</p>`;
+    }
+
+    return `<p class="stock agotado">Agotado</p>`;
+  }
+
+  function obtenerFechaProducto(producto) {
+    const fecha = producto.fecha_actualizacion || producto.fecha_creacion || "";
+    const tiempo = new Date(fecha).getTime();
+
+    if (!isNaN(tiempo)) {
+      return tiempo;
+    }
+
+    const idNumerico = String(producto.id_producto || "").replace(/\D/g, "");
+    return Number(idNumerico || 0);
+  }
+
+  function ordenarProductosRecientes(productos) {
+    return [...productos].sort((a, b) => obtenerFechaProducto(b) - obtenerFechaProducto(a));
+  }
+
+  function crearTarjetaProducto(producto) {
+    const variante = obtenerVariantePrincipal(producto);
+
+    const imagen = convertirImagenDrive(producto.imagen_principal_url || variante.imagen_url);
+    const descripcion = producto.descripcion || "Producto disponible en Toque Urbano.";
+    const categoria = producto.categoria || "General";
+    const marca = producto.marca || "Sin marca";
+    const nombre = producto.nombre || "Producto";
+    const color = variante.color || "";
+    const talla = variante.talla || "";
+    const destacado = String(producto.destacado || "").toLowerCase() === "si";
+    const stock = Number(variante.stock || 0);
+
+    // WhatsApp se mantiene conectado a configuracion/base de datos.
+    // No se cambia el número aquí: se lee desde configuracion.whatsapp.
+    const whatsapp = configuracion.whatsapp || "593988951244";
+    const mensajeBase = configuracion.mensaje_whatsapp || "Hola, vengo de la página web de Toque Urbano. Me interesa este producto:";
+    const textoWhatsapp = encodeURIComponent(`${mensajeBase} ${nombre}`);
+    const linkWhatsapp = `https://wa.me/${whatsapp}?text=${textoWhatsapp}`;
+
+    const card = document.createElement("div");
+    card.className = "producto";
+    card.innerHTML = `
+      ${destacado ? '<div class="etiqueta-destacado">DESTACADO</div>' : ''}
+
+      <div class="imagen-producto">
+        <img src="${imagen}" alt="${nombre}" loading="lazy">
+      </div>
+
+      <h3>${nombre}</h3>
+      <p class="categoria">${categoria}</p>
+      <p class="descripcion">${descripcion}</p>
+
+      <div class="detalles-producto">
+        <p class="detalle-producto"><strong>Marca:</strong> ${marca}</p>
+        <p class="detalle-producto"><strong>Color:</strong> ${color || '-'}</p>
+        <p class="detalle-producto"><strong>Talla:</strong> ${talla || '-'}</p>
+      </div>
+
+      ${obtenerPrecioHTML(variante)}
+      ${obtenerStockHTML(variante)}
+
+      <a href="${linkWhatsapp}" class="button ${stock <= 0 ? 'disabled' : ''}" target="_blank">
+        ${stock <= 0 ? 'Producto agotado' : 'Consultar por WhatsApp'}
+      </a>
+    `;
+
+    return card;
+  }
+
+  function mostrarProductosAgrupados(productos) {
+    const contenedor = document.getElementById("productos");
+    const mensaje = document.getElementById("mensaje");
+
+    contenedor.innerHTML = "";
+
+    if (!productos || productos.length === 0) {
+      mensaje.innerText = "No hay productos disponibles con estos filtros.";
+      return;
+    }
+
+    mensaje.innerText = "";
+    contenedor.style.display = "block";
+
+    const productosPorCategoria = {};
+
+    productos.forEach(producto => {
+      const categoria = producto.categoria || "General";
+
+      if (!productosPorCategoria[categoria]) {
+        productosPorCategoria[categoria] = [];
+      }
+
+      productosPorCategoria[categoria].push(producto);
+    });
+
+    const categoriasOrdenadas = [];
+
+    categoriasGlobal.forEach(cat => {
+      if (cat.nombre && productosPorCategoria[cat.nombre]) {
+        categoriasOrdenadas.push(cat.nombre);
+      }
+    });
+
+    Object.keys(productosPorCategoria).forEach(categoria => {
+      if (!categoriasOrdenadas.includes(categoria)) {
+        categoriasOrdenadas.push(categoria);
+      }
+    });
+
+    categoriasOrdenadas.forEach(categoria => {
+      const bloque = document.createElement("section");
+      bloque.className = "categoria-bloque";
+
+      const titulo = document.createElement("h3");
+      titulo.className = "categoria-titulo";
+      titulo.textContent = categoria;
+
+      const grid = document.createElement("div");
+      grid.className = "categoria-productos";
+
+      ordenarProductosRecientes(productosPorCategoria[categoria]).forEach(producto => {
+        grid.appendChild(crearTarjetaProducto(producto));
+      });
+
+      bloque.appendChild(titulo);
+      bloque.appendChild(grid);
+      contenedor.appendChild(bloque);
+    });
+  }
+
+  function mostrarProductos(productos) {
+    const contenedor = document.getElementById("productos");
+    const mensaje = document.getElementById("mensaje");
+
+    contenedor.innerHTML = "";
+
+    if (!productos || productos.length === 0) {
+      mensaje.innerText = "No hay productos disponibles con estos filtros.";
+      return;
+    }
+
+    mensaje.innerText = "";
+    contenedor.style.display = "grid";
+
+    ordenarProductosRecientes(productos).forEach(producto => {
+      contenedor.appendChild(crearTarjetaProducto(producto));
+    });
+  }
+
+  function obtenerProductosFiltrados() {
+    return productosGlobal.filter(producto => {
+      const coincideCategoria =
+        categoriaSeleccionada === "todos" ||
+        String(producto.categoria || "") === categoriaSeleccionada;
+
+      const coincideMarca =
+        marcaSeleccionada === "todas" ||
+        String(producto.marca || "") === marcaSeleccionada;
+
+      return coincideCategoria && coincideMarca;
+    });
+  }
+
+  function aplicarFiltros() {
+    const filtrados = obtenerProductosFiltrados();
+
+    if (categoriaSeleccionada === "todos") {
+      mostrarProductosAgrupados(filtrados);
+      return;
+    }
+
+    mostrarProductos(filtrados);
+  }
+
+  function filtrarPorCategoria(categoria, boton) {
+    categoriaSeleccionada = categoria;
+    marcaSeleccionada = "todas";
+
+    document.querySelectorAll("#filtrosCategorias button").forEach(btn => {
+      btn.classList.remove("activo");
+    });
+
+    if (boton) {
+      boton.classList.add("activo");
+    }
+
+    cargarMarcas(productosGlobal);
+    aplicarFiltros();
+  }
+
+  function filtrarPorMarca(marca) {
+    seleccionarMarca(marca || "todas", marca === "todas" ? "Todas las marcas" : marca);
+  }
+
+  function limpiarFiltros() {
+    categoriaSeleccionada = "todos";
+    marcaSeleccionada = "todas";
+
+    const botonTodos = document.querySelector('#filtrosCategorias button[data-categoria="todos"]');
+    document.querySelectorAll("#filtrosCategorias button").forEach(btn => {
+      btn.classList.remove("activo");
+    });
+
+    if (botonTodos) {
+      botonTodos.classList.add("activo");
+    }
+
+    cargarMarcas(productosGlobal);
+    aplicarFiltros();
+  }
+
+  cargarDatos();
+</script>
+
+</body>
+</html>

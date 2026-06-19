@@ -582,18 +582,18 @@
 
   async function cargarDatos() {
     try {
-      const configRes = await fetch(API_URL + "?accion=configuracion");
-      const configJson = await configRes.json();
-      configuracion = configJson.data || {};
+      const catalogoRes = await fetch(API_URL + "?accion=catalogoCompleto");
+      const catalogoJson = await catalogoRes.json();
 
-      const categoriasRes = await fetch(API_URL + "?accion=categorias");
-      const categoriasJson = await categoriasRes.json();
+      if (!catalogoJson.ok) {
+        throw new Error(catalogoJson.mensaje || "No se pudo cargar el catálogo completo.");
+      }
 
-      const productosRes = await fetch(API_URL + "?accion=productos");
-      const productosJson = await productosRes.json();
+      const data = catalogoJson.data || {};
 
-      productosGlobal = productosJson.data || [];
-      categoriasGlobal = categoriasJson.data || [];
+      configuracion = data.configuracion || {};
+      categoriasGlobal = data.categorias || [];
+      productosGlobal = data.productos || [];
 
       cargarCategorias(categoriasGlobal);
       cargarMarcas(productosGlobal);
@@ -737,7 +737,7 @@
     }
 
     if (id) {
-      return `https://drive.google.com/thumbnail?id=${id}&sz=w700`;
+      return `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
     }
 
     return url;

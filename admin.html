@@ -136,6 +136,21 @@
       margin-top: 0.5rem;
     }
 
+    .ayuda-campo {
+      font-size: 0.82rem;
+      color: #777;
+      margin-top: 5px;
+      line-height: 1.35;
+      font-weight: normal;
+    }
+
+    button:disabled {
+      background: #999;
+      color: #f1f1f1;
+      cursor: not-allowed;
+      opacity: 0.75;
+    }
+
     .preview {
       margin-top: 1rem;
       text-align: center;
@@ -722,6 +737,7 @@
         <div>
           <label>Nombre del producto *</label>
           <input type="text" id="nombre" placeholder="Ejemplo: Jean Slim Azul">
+          <div class="ayuda-campo">Use un nombre corto y claro. Ejemplo: Gorra New Era Roja.</div>
         </div>
 
         <div>
@@ -729,11 +745,13 @@
           <select id="categoria">
             <option value="">Seleccione categoría</option>
           </select>
+          <div class="ayuda-campo">Seleccione la categoría correcta para que el producto se agrupe bien en el catálogo.</div>
         </div>
 
         <div>
           <label>Marca</label>
-          <input type="text" id="marca" value="Toque Urbano">
+          <input type="text" id="marca" placeholder="Ejemplo: Nike, Adidas, Hugo Boss">
+          <div class="ayuda-campo">Escriba la marca real del producto. Déjelo vacío solo si el producto no tiene marca.</div>
         </div>
 
         <div>
@@ -748,26 +766,31 @@
         <div>
           <label>Precio *</label>
           <input type="number" id="precio" placeholder="Ejemplo: 28" step="0.01">
+          <div class="ayuda-campo">Ingrese solo números. Ejemplo: 28 o 28.50.</div>
         </div>
 
         <div>
           <label>Precio oferta</label>
           <input type="number" id="precio_oferta" placeholder="Opcional" step="0.01">
+          <div class="ayuda-campo">Use este campo solo si el producto tiene descuento.</div>
         </div>
 
         <div>
           <label>Stock</label>
           <input type="number" id="stock" placeholder="Ejemplo: 5">
+          <div class="ayuda-campo">Cantidad disponible para venta. Si no hay unidades, coloque 0.</div>
         </div>
 
         <div>
           <label>Color</label>
           <input type="text" id="color" placeholder="Ejemplo: Azul">
+          <div class="ayuda-campo">Puede escribir uno o varios colores. Ejemplo: Blanco y negro.</div>
         </div>
 
         <div>
           <label>Talla</label>
           <input type="text" id="talla" placeholder="Ejemplo: M">
+          <div class="ayuda-campo">Ejemplo: S, M, L, XL o 40, 41, 42.</div>
         </div>
 
         <div>
@@ -790,10 +813,12 @@
 
       <label>Descripción</label>
       <textarea id="descripcion" placeholder="Describe brevemente el producto"></textarea>
+      <div class="ayuda-campo">Escriba una descripción breve y comercial. Evite textos muy largos.</div>
 
       <label>Imagen del producto</label>
       <input type="file" id="imagenArchivo" accept="image/*" onchange="previsualizarImagen()">
       <div class="nota">Seleccione una imagen desde su computadora o celular.</div>
+      <div class="ayuda-campo">Recomendado: imagen cuadrada, clara, liviana y con el producto centrado.</div>
 
       <div class="preview" id="previewBox">
         <img id="previewImg" src="" alt="Vista previa">
@@ -1220,6 +1245,7 @@
   let catImagenBase64 = "";
   let catImagenNombre = "";
   let catImagenTipo = "";
+  let guardandoProducto = false;
 
   async function login() {
     const usuario = document.getElementById("usuario").value.trim();
@@ -1432,7 +1458,7 @@
 
     document.getElementById("nombre").value = producto.nombre || "";
     document.getElementById("categoria").value = producto.categoria || "";
-    document.getElementById("marca").value = producto.marca || "Toque Urbano";
+    document.getElementById("marca").value = producto.marca || "";
     document.getElementById("genero").value = producto.genero || "Unisex";
     document.getElementById("precio").value = producto.precio || "";
     document.getElementById("precio_oferta").value = producto.precio_oferta || "";
@@ -1836,7 +1862,13 @@
   }
 
   async function guardarProducto() {
+    if (guardandoProducto) {
+      mostrarMensaje("mensajeAdmin", "Ya se está guardando el producto. Espere un momento.", "error");
+      return;
+    }
+
     const modo = document.getElementById("modoEdicion").value;
+    const btnGuardar = document.getElementById("btnGuardar");
     const nombre = document.getElementById("nombre").value.trim();
     const categoria = document.getElementById("categoria").value;
     const precio = document.getElementById("precio").value;
@@ -1870,6 +1902,12 @@
       observacion: document.getElementById("observacion").value.trim()
     };
 
+    guardandoProducto = true;
+    if (btnGuardar) {
+      btnGuardar.disabled = true;
+      btnGuardar.innerText = modo === "editar" ? "Actualizando..." : "Guardando...";
+    }
+
     mostrarMensaje("mensajeAdmin", modo === "editar" ? "Guardando cambios..." : "Guardando producto, espere...", "ok");
 
     try {
@@ -1892,6 +1930,12 @@
     } catch (error) {
       mostrarMensaje("mensajeAdmin", "Error al conectar con el servidor.", "error");
       console.error(error);
+    } finally {
+      guardandoProducto = false;
+      if (btnGuardar) {
+        btnGuardar.disabled = false;
+        btnGuardar.innerText = document.getElementById("modoEdicion").value === "editar" ? "Actualizar Producto" : "Guardar Producto";
+      }
     }
   }
 
@@ -1905,7 +1949,7 @@
     document.getElementById("id_producto").value = "";
     document.getElementById("nombre").value = "";
     document.getElementById("categoria").value = "";
-    document.getElementById("marca").value = "Toque Urbano";
+    document.getElementById("marca").value = "";
     document.getElementById("genero").value = "Unisex";
     document.getElementById("precio").value = "";
     document.getElementById("precio_oferta").value = "";
@@ -2086,7 +2130,7 @@
       id_producto: producto.id_producto,
       nombre: producto.nombre || "",
       categoria: producto.categoria || "",
-      marca: producto.marca || "Toque Urbano",
+      marca: producto.marca || "",
       genero: producto.genero || "Unisex",
       descripcion: producto.descripcion || "",
       imagen_principal_url: producto.imagen_principal_url || producto.imagen_variante_url || "",

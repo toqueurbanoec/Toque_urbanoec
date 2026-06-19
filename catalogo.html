@@ -437,6 +437,36 @@
       color: #555;
     }
 
+    .paginacion-catalogo {
+      text-align: center;
+      margin: 2rem 0 0;
+      display: none;
+    }
+
+    .btn-ver-mas {
+      background: #111;
+      color: #fff;
+      border: 1px solid #c9a227;
+      padding: 12px 24px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: bold;
+      letter-spacing: 0.4px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    }
+
+    .btn-ver-mas:hover {
+      background: #c9a227;
+      color: #111;
+    }
+
+    .paginacion-info {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: #666;
+      font-weight: bold;
+    }
+
     footer {
       background: #111;
       color: white;
@@ -525,6 +555,11 @@
 
   <div class="productos" id="productos"></div>
 
+  <div class="paginacion-catalogo" id="paginacionCatalogo">
+    <button type="button" class="btn-ver-mas" onclick="verMasProductos()">Ver más productos</button>
+    <div class="paginacion-info" id="paginacionInfo"></div>
+  </div>
+
   <div class="mensaje" id="mensaje">Cargando catálogo...</div>
 </main>
 
@@ -542,6 +577,8 @@
   let configuracion = {};
   let categoriaSeleccionada = "todos";
   let marcaSeleccionada = "todas";
+  const PRODUCTOS_POR_BLOQUE = 50;
+  let cantidadVisible = PRODUCTOS_POR_BLOQUE;
 
   async function cargarDatos() {
     try {
@@ -909,15 +946,88 @@
     });
   }
 
-  function aplicarFiltros() {
-    const filtrados = obtenerProductosFiltrados();
+  function obtenerProductosOrdenadosParaVista(productos) {
+    if (categoriaSeleccionada !== "todos") {
+      return ordenarProductosRecientes(productos);
+    }
 
-    if (categoriaSeleccionada === "todos") {
-      mostrarProductosAgrupados(filtrados);
+    const productosPorCategoria = {};
+
+    productos.forEach(producto => {
+      const categoria = producto.categoria || "General";
+
+      if (!productosPorCategoria[categoria]) {
+        productosPorCategoria[categoria] = [];
+      }
+
+      productosPorCategoria[categoria].push(producto);
+    });
+
+    const categoriasOrdenadas = [];
+
+    categoriasGlobal.forEach(cat => {
+      if (cat.nombre && productosPorCategoria[cat.nombre]) {
+        categoriasOrdenadas.push(cat.nombre);
+      }
+    });
+
+    Object.keys(productosPorCategoria).forEach(categoria => {
+      if (!categoriasOrdenadas.includes(categoria)) {
+        categoriasOrdenadas.push(categoria);
+      }
+    });
+
+    const productosOrdenados = [];
+
+    categoriasOrdenadas.forEach(categoria => {
+      ordenarProductosRecientes(productosPorCategoria[categoria]).forEach(producto => {
+        productosOrdenados.push(producto);
+      });
+    });
+
+    return productosOrdenados;
+  }
+
+  function actualizarPaginacion(totalProductos) {
+    const paginacion = document.getElementById("paginacionCatalogo");
+    const info = document.getElementById("paginacionInfo");
+
+    if (!paginacion || !info) return;
+
+    const visibles = Math.min(cantidadVisible, totalProductos);
+
+    if (totalProductos > visibles) {
+      paginacion.style.display = "block";
+      info.innerText = `Mostrando ${visibles} de ${totalProductos} productos`;
       return;
     }
 
-    mostrarProductos(filtrados);
+    paginacion.style.display = "none";
+    info.innerText = "";
+  }
+
+  function verMasProductos() {
+    cantidadVisible += PRODUCTOS_POR_BLOQUE;
+    aplicarFiltros(false);
+  }
+
+  function aplicarFiltros(reiniciar = true) {
+    if (reiniciar) {
+      cantidadVisible = PRODUCTOS_POR_BLOQUE;
+    }
+
+    const filtrados = obtenerProductosFiltrados();
+    const ordenadosParaVista = obtenerProductosOrdenadosParaVista(filtrados);
+    const productosVisibles = ordenadosParaVista.slice(0, cantidadVisible);
+
+    if (categoriaSeleccionada === "todos") {
+      mostrarProductosAgrupados(productosVisibles);
+      actualizarPaginacion(ordenadosParaVista.length);
+      return;
+    }
+
+    mostrarProductos(productosVisibles);
+    actualizarPaginacion(ordenadosParaVista.length);
   }
 
   function filtrarPorCategoria(categoria, boton) {

@@ -1292,39 +1292,26 @@
   };
 
   async function iniciarIndex() {
-    try {
-      const datos = await cargarDatosIndex();
+    // Prueba segura de velocidad:
+    // Las categorías empiezan a cargar de inmediato y no esperan a configuración.
+    // La configuración se aplica apenas llega.
+    // Los destacados se cargan después de aplicar configuración para conservar WhatsApp dinámico.
+    const promesaCategorias = cargarCategorias();
 
-      configuracion = {
-        ...configuracion,
-        ...(datos.configuracion || {})
-      };
+    const promesaConfiguracion = cargarConfiguracion()
+      .then(() => {
+        aplicarConfiguracion();
+      })
+      .catch(error => {
+        console.error("Error al iniciar configuración:", error);
+        aplicarConfiguracion();
+      });
 
-      aplicarConfiguracion();
-      await cargarCategorias(datos.categorias || []);
-      await cargarDestacados(datos.productos || []);
+    promesaConfiguracion.finally(() => {
+      cargarDestacados();
+    });
 
-    } catch (error) {
-      console.error("Error carga unificada index:", error);
-
-      // Respaldo de compatibilidad: si catalogoCompleto falla,
-      // el index conserva la carga anterior por separado.
-      await cargarConfiguracion();
-      aplicarConfiguracion();
-      await cargarCategorias();
-      await cargarDestacados();
-    }
-  }
-
-  async function cargarDatosIndex() {
-    const res = await fetch(API_URL + "?accion=catalogoCompleto");
-    const json = await res.json();
-
-    if (!json.ok || !json.data) {
-      throw new Error("Respuesta inválida de catalogoCompleto");
-    }
-
-    return json.data;
+    await Promise.allSettled([promesaCategorias, promesaConfiguracion]);
   }
 
   async function cargarConfiguracion() {
@@ -1343,17 +1330,14 @@
     }
   }
 
-  async function cargarCategorias(categoriasPrecargadas = null) {
+  async function cargarCategorias() {
     const contenedor = document.getElementById("contenedorCategorias");
 
     try {
-      let categorias = categoriasPrecargadas;
+      const res = await fetch(API_URL + "?accion=categorias");
+      const json = await res.json();
 
-      if (!Array.isArray(categorias)) {
-        const res = await fetch(API_URL + "?accion=categorias");
-        const json = await res.json();
-        categorias = json.data || [];
-      }
+      const categorias = json.data || [];
       contenedor.innerHTML = "";
 
       if (categorias.length === 0) {
@@ -1377,7 +1361,8 @@
             <img src="${imagen}" 
                  alt="${cat.nombre || 'Categoría'}" 
                  class="categoria-img"
-                 loading="lazy"
+                 loading="eager"
+                 decoding="async"
                  onerror="this.onerror=null;this.src='${IMAGEN_PLACEHOLDER}';">
           </div>
           <div class="categoria-overlay">
@@ -1395,19 +1380,14 @@
     }
   }
 
-  async function cargarDestacados(productosPrecargados = null) {
+  async function cargarDestacados() {
     const contenedor = document.getElementById("contenedorDestacados");
 
     try {
-      let productosBase = productosPrecargados;
+      const res = await fetch(API_URL + "?accion=productos");
+      const json = await res.json();
 
-      if (!Array.isArray(productosBase)) {
-        const res = await fetch(API_URL + "?accion=productos");
-        const json = await res.json();
-        productosBase = json.data || [];
-      }
-
-      const productos = (productosBase || []).filter(p =>
+      const productos = (json.data || []).filter(p =>
         String(p.destacado || "no").toLowerCase() === "si"
       );
 
